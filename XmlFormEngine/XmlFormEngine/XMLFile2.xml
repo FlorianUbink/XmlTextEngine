@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<Game>
+  <Event EI ="1">
+
+    <Print CI ="1">
+      Hello, here are your options:
+      <Enable EI ="2">
+        hi: //Break(2) //Player.Age years old
+      </Enable>
+      <Disable EI ="2">
+        Ethan Bradberry
+      </Disable>
+    </Print>
+
+    <Branch CI ="1">
+      <Option Tag ="A">
+        <Conditions>
+          Player.Age > 2
+        </Conditions>
+        <Input Tag ="Click"> 
+          This is a type text input. Click me!
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+          Player.Age > Player.Strength
+        </Roll>
+        <Result>
+          Player.Age +=5
+          Link(2)
+        </Result>
+      </Option>
+      <Option Tag ="B">
+        <Conditions>
+          Player.Age > 5
+        </Conditions>
+        <Input Tag ="Click">
+          Optioones B es
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+          Player.Age > Player.Strength
+        </Roll>
+        <Result>
+          Player.Age +=5
+          To(2)
+        </Result>
+      </Option>
+    </Branch>
+    
+    <Print CI ="2">
+      You found the super secret storyblock, wowie!
+    </Print>
+    
+  </Event>
+
+  <Event EI ="2">
+    <Print>
+      event 2
+     <Enable EI ="1">
+       EI 1 enabled
+     </Enable>
+    </Print>
+    
+  </Event>
+  </Game>

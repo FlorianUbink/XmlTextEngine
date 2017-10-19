@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Game>
+  <Event EI ="1">
+    <Print>
+      Printbox 1
+      Line2
+      Line3
+      Line56677
+    </Print>
+    <Print>
+      Printbox2
+    </Print>
+    
+  </Event>
+</Game>
