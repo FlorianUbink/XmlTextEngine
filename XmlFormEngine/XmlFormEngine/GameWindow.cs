@@ -25,7 +25,6 @@ namespace XmlFormEngine
         public GameWindow()
         {
             gameManager = new GameManager();
-            GameManager.gameUpdate = GameUpdate.FileChange;
             clickDic = new Dictionary<string, Label>();
             branch2Handle = new BranchReturnHandle(gameManager.eventProcessor.Branch2);
             InitializeComponent();
@@ -57,6 +56,25 @@ namespace XmlFormEngine
             
         }
 
+        public static void PrintConsole(List<string> preProssesed)
+        {
+            if (windowHandle.PrintBox.Text != "")
+            {
+                Point newCursorPoint = new Point(Cursor.Position.X, windowHandle.maxY);
+                Cursor.Position = newCursorPoint;
+
+            }
+
+
+            foreach (string pString in preProssesed)
+            {
+                windowHandle.PrintBox.Text += pString;
+            }
+
+        }
+
+
+
         public static string InputBranch(Dictionary<string,string> ClickDic, Dictionary<string, string> TypeDic, XmlNodeList commandList)
         {
             windowHandle.AllowEnter = false;
@@ -71,7 +89,9 @@ namespace XmlFormEngine
                     windowHandle.clickDic[key].Text = ClickDic[key];
                     windowHandle.clickDic[key].Visible = true;
                     windowHandle.clickDic[key].Enabled = true;
+                    windowHandle.clickDic[key].BringToFront();
                     windowHandle.clickDic[key].Location = new Point(5, windowHandle.maxY + 5);
+                    windowHandle.maxY = windowHandle.clickDic[key].Location.Y;
                     windowHandle.maxY += windowHandle.clickDic[key].Height;
                 }
 
@@ -165,15 +185,7 @@ namespace XmlFormEngine
 
         private void PrintBox_ContentsResized(object sender, ContentsResizedEventArgs e)
         {
-            if (PrintBox.Text != "")
-            {
-                PrintBox.Height = e.NewRectangle.Height + 5;
-                PrintBox.Width = e.NewRectangle.Width;
-                PrintBox.Location = new Point(5, maxY + 5);
-                maxY = maxY + PrintBox.Height;
-                PrintBox.Show();
-                PrintBox.Enabled = true;
-            }
+            maxY = e.NewRectangle.Height;
            
         }
 
@@ -184,11 +196,15 @@ namespace XmlFormEngine
             windowHandle.maxY = 0;
             windowHandle.AllowEnter = true;
 
-            foreach (Control c in windowHandle.Controls)
+            foreach (string key in windowHandle.clickDic.Keys)
             {
-                c.Hide();
-                c.Enabled = false;
+                windowHandle.clickDic[key].Text = "";
+                windowHandle.clickDic[key].Enabled = false;
+                windowHandle.clickDic[key].Visible = false;
+
             }
+
+            windowHandle.PrintBox.Text = "";
 
             // reload
             windowHandle.gameManager.Update();

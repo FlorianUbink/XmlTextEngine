@@ -1,10 +1,10 @@
-﻿using System.Xml;
+﻿using System.Collections.Generic;
+using System.Xml;
 
 namespace XmlFormEngine
 {
     public enum GameUpdate
     {
-        FileChange,
         NodeChange,
         NextCommand
     }
@@ -12,7 +12,6 @@ namespace XmlFormEngine
     public class GameManager
     {
         public EventProcessor eventProcessor = new EventProcessor();
-        XmlDocument xmlDoc = new XmlDocument();
         XmlNodeList commandList;
 
         int prevEI = -1;
@@ -26,30 +25,19 @@ namespace XmlFormEngine
 
             // de-bug
             xmlPath = @"..\..\XMLFile2.xml";
-            eventProcessor.ManualEISet("1");
-            CurrentEventI = 1;
+            //eventProcessor.ManualEISet("1");
+            CurrentEventI = 10;
             eventProcessor.nextCI = 1;
         }
 
-
-        public void GetXmlFile(string path)
-        {
-            xmlDoc.Load(path);
-        }
 
         public void Update()
         {
             ReUpdate:
             switch (gameUpdate)
             {
-                case GameUpdate.FileChange:
-                    GetXmlFile(xmlPath);
-                    gameUpdate = GameUpdate.NodeChange;
-                    goto ReUpdate;
-                    
-
                 case GameUpdate.NodeChange:
-                    eventProcessor.LoadNode(xmlDoc, CurrentEventI);
+                    eventProcessor.LoadNode(CurrentEventI);
                     gameUpdate = GameUpdate.NextCommand;
                     goto ReUpdate;
 

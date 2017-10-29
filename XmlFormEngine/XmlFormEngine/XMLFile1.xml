@@ -1,16 +1,102 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <Game>
-  <Event EI ="1">
+
+  <Event EI ="10">
     <Print>
-      Printbox 1
-      Line2
-      Line3
-      Line56677
+    Debug Xml-File. EI10
+    
+    Your options are:
+    
+    <Enable CI = "1">
+      A. Uses CI codes - DISABLED
+    </Enable>
+    <Disable CI ="1">
+      A. Uses CI codes - ENABLED
+    </Disable>
+    and
+    <Enable EI = "13">
+      B. Uses EI codes - DISABLED
+    </Enable>
+    <Disable EI = "13">
+      B. Uses EI codes -ENABLED
+    </Disable>
     </Print>
+    
+    <Branch>
+      <Option Tag ="A">
+        <Condition>
+          isCI(1) = 1
+        </Condition>
+        <Input Tag ="Click">
+          A
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+        </Roll>
+        <Result>
+          To(1)
+        </Result>
+      </Option>
+      
+      <Option Tag ="B">
+        <Condition>
+          isEI(13) > 1
+        </Condition>
+        <Input Tag ="Click">
+          B
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+        </Roll>
+        <Result>
+          Link(13)
+        </Result>
+      </Option>
+    </Branch>
+
+    <Print CI ="1">
+      Textblock CI1
+    </Print>
+    
+  </Event>
+
+  <Event EI ="13">
     <Print>
-      Printbox2
+      Textblock EI13
     </Print>
+
+    <Branch>
+      <Option Tag ="A">
+        <Condition>
+          isCI(1) = 1
+        </Condition>
+        <Input Tag ="Click">
+          A
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+        </Roll>
+        <Result>
+          To(1)
+        </Result>
+      </Option>
+
+      <Option Tag ="B">
+        <Condition>
+          isEI(13) = 1
+        </Condition>
+        <Input Tag ="Click">
+          B
+        </Input>
+        <Roll>
+          Player.Strength + 5 > Dice
+        </Roll>
+        <Result>
+          Link(13)
+        </Result>
+      </Option>
+    </Branch>
     
   </Event>
 </Game>

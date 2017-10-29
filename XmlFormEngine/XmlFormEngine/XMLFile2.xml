@@ -29,7 +29,7 @@
         </Roll>
         <Result>
           Player.Age +=5
-          Link(2)
+          Link(3)
         </Result>
       </Option>
       <Option Tag ="B">

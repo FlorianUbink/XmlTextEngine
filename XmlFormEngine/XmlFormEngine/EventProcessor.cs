@@ -29,13 +29,14 @@ namespace XmlFormEngine
         List<int> EnabledEI = new List<int>();
         List<int> EnabledCI = new List<int>();
 
-        public delegate void PrintBoxHandle(string pText);
-        PrintBoxHandle pbHandle = new PrintBoxHandle(GameWindow.PrintTextBox);
+        public delegate void PrintBoxHandle(List<string> preProcessed);
+        PrintBoxHandle pbHandle = new PrintBoxHandle(GameWindow.PrintConsole);
         public delegate string BranchInputHandler(Dictionary<string, string> ClickDic, Dictionary<string, string> TypeDic, XmlNodeList commandOption);
         BranchInputHandler InputHandle = new BranchInputHandler(GameWindow.InputBranch);
         public delegate void ResetWindowHandle();
         ResetWindowHandle resetHandle = new ResetWindowHandle(GameWindow.ResetWindow);
 
+        Dictionary<string, string> XmlFileLibrary = new Dictionary<string, string>();
 
         XmlNodeList CommandList = null;
         XmlDocument xmlDoc = new XmlDocument();
@@ -48,9 +49,29 @@ namespace XmlFormEngine
 
         #region Public functions
 
-        public void LoadNode(XmlDocument xmlDoc, int CurrentEventI)
+        public EventProcessor()
         {
+            #region LoadXmlLibrary
+            XmlFileLibrary = new Dictionary<string, string>();
+            XmlFileLibrary.Add("1-2", "XMLFile2.xml");
+            XmlFileLibrary.Add("10-13", "XMLFile1.xml");
+            
+            
+            #endregion
+        }
+
+
+        public void LoadNode(int CurrentEventI)
+        {
+            Reload:
             CommandList = null;
+            if (xmlDoc.SelectSingleNode("/Game/Event[@EI = " + CurrentEventI + "]") == null)
+            {
+                XmlFileLoader(CurrentEventI);
+                goto Reload;
+            }
+
+
             CommandList = xmlDoc.SelectSingleNode("/Game/Event[@EI = " + CurrentEventI + "]").ChildNodes;
             indexIndex = 0;
             AutoNode = true;
@@ -105,6 +126,27 @@ namespace XmlFormEngine
         }
         #endregion
 
+
+        private void XmlFileLoader (int EI)
+        {
+            
+            foreach (string range in XmlFileLibrary.Keys)
+            {
+                string[] spectrum = range.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (EI >= int.Parse(spectrum[0]) && EI < int.Parse(spectrum[1]))
+                {
+                    xmlDoc.Load((@"..\..\" + XmlFileLibrary[range]));
+                    break;
+                }
+            }
+
+            if (xmlDoc == null)
+            {
+                throw new Exception("Cant find:" + EI);
+            }   
+        }
+
         #region Command-functions
         private bool CommandProces(XmlNode CommandNode)
         {
@@ -130,6 +172,7 @@ namespace XmlFormEngine
 
         private bool Print(XmlNodeList commandPrintList)
         {
+            List<string> preProcessed = new List<string>();
             string windowText = "";
 
             foreach (XmlNode printNode in commandPrintList)
@@ -144,6 +187,7 @@ namespace XmlFormEngine
                             string pText = printNode.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
                             pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
 
                             windowText += pText;
                         }
@@ -155,6 +199,8 @@ namespace XmlFormEngine
                             string pText = printNode.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
                             pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
                             windowText += pText;
                         }
                     }
@@ -168,6 +214,8 @@ namespace XmlFormEngine
                             string pText = printNode.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
                             pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
                             windowText += pText;
                         }
                     }
@@ -178,6 +226,8 @@ namespace XmlFormEngine
                             string pText = printNode.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
                             pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
                             windowText += pText;
                         }
                     }
@@ -189,12 +239,13 @@ namespace XmlFormEngine
                     string pText = printNode.InnerText.TrimStart();
                     pText = pText.TrimEnd(new char[] { ' ' });
                     pText = SlashCommands(pText);
+                    preProcessed.Add(pText);
 
                     windowText += pText;
                 }
             }
 
-            pbHandle.Invoke(windowText);
+            pbHandle.Invoke(preProcessed);
             return true;    // return value indicates if this block contains a stop-autoreload
         }
 
