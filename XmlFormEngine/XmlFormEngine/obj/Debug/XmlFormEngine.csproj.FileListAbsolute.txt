@@ -22,3 +22,6 @@ D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngi
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Properties.Resources.resources
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csproj.GenerateResource.Cache
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Game.resources
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngine.exe.config
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.exe
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.pdb

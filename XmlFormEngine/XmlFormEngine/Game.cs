@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace XmlFormEngine
 {
@@ -19,12 +20,11 @@ namespace XmlFormEngine
 
     public enum CommandHandling
     {
-        PrintNew,
-        PrintContinue,
-        BranchCondition,
-        BranchInput,
-        BranchRoll,
-        BranchResult
+        Print,
+        Branch_Condition,
+        Branch_Input,
+        Branch_Roll,
+        Branch_Result
     }
 
     public partial class Game : Form
@@ -35,9 +35,16 @@ namespace XmlFormEngine
         public CommandHandling currentHandling { get; set; }
         #endregion
         #region Private
+        EventProcessor eventProcessor;
+
         //Print
         List<string> sourceText = new List<string>();
 
+        // Banch
+        XmlDocument XmlFile_Current = new XmlDocument();
+        XmlNodeList option_List = null;
+        bool input_Available = false;
+        bool roll_Available = false;
         #endregion
         #endregion
 
@@ -50,7 +57,7 @@ namespace XmlFormEngine
 
         private void Game_Load(object sender, EventArgs e)
         {
-
+            eventProcessor = new EventProcessor();
         }
 
         private void Game_KeyPress(object sender, KeyPressEventArgs e)
@@ -75,20 +82,29 @@ namespace XmlFormEngine
 
         private void UpdateGame()
         {
+            Update_Start:
             switch (currentHandling)
             {
-                case CommandHandling.PrintNew:
-                    // 
+                case CommandHandling.Print:
                     break;
-                case CommandHandling.PrintContinue:
+                case CommandHandling.Branch_Condition:
+                    option_List = eventProcessor.Condition_Check(option_List, out input_Available, out roll_Available);
+                    if (input_Available)
+                    {
+                        currentHandling = CommandHandling.Branch_Input;
+                    }
+                    else if (roll_Available)
+                    {
+                        currentHandling = CommandHandling.Branch_Roll;
+                    }
+                    goto Update_Start;
+
+                case CommandHandling.Branch_Input:
+                    eventProcessor.Input_SetTrigger(option_List, ref Opt_A, ref Opt_B, ref Opt_C, ref Opt_D);
                     break;
-                case CommandHandling.BranchCondition:
+                case CommandHandling.Branch_Roll:
                     break;
-                case CommandHandling.BranchInput:
-                    break;
-                case CommandHandling.BranchRoll:
-                    break;
-                case CommandHandling.BranchResult:
+                case CommandHandling.Branch_Result:
                     break;
                 default:
                     break;

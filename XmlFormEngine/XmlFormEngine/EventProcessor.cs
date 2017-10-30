@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Windows.Forms;
 using System.Xml;
 using TextProcessing;
 
@@ -248,7 +249,7 @@ namespace XmlFormEngine
             pbHandle.Invoke(preProcessed);
             return true;    // return value indicates if this block contains a stop-autoreload
         }
-
+        
         private void Branch(XmlNodeList commandOptionList)
         {
 
@@ -366,6 +367,185 @@ namespace XmlFormEngine
 
             }
         }
+
+        #region Experimental: newIdea
+        bool input_Available = false;
+        bool roll_Available = false;
+
+        public List<string> Print_PreProcess(XmlNodeList Print_List)
+        {
+            List<string> preProcessed = new List<string>();
+            string windowText = "";
+
+            foreach (XmlNode XmlString in Print_List)
+            {
+                #region Enable/Disable nodes
+                if (XmlString.Name == "Enable")
+                {
+                    if (XmlString.Attributes["EI"] != null)
+                    {
+                        if (EnabledEI.Contains(int.Parse(XmlString.Attributes["EI"].Value)))
+                        {
+                            string pText = XmlString.InnerText.TrimStart();
+                            pText = pText.TrimEnd(new char[] { ' ' });
+                            pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
+                            windowText += pText;
+                        }
+                    }
+                    if (XmlString.Attributes["CI"] != null)
+                    {
+                        if (EnabledCI.Contains(int.Parse(XmlString.Attributes["CI"].Value)))
+                        {
+                            string pText = XmlString.InnerText.TrimStart();
+                            pText = pText.TrimEnd(new char[] { ' ' });
+                            pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
+                            windowText += pText;
+                        }
+                    }
+                }
+                else if (XmlString.Name == "Disable")
+                {
+                    if (XmlString.Attributes["EI"] != null)
+                    {
+                        if (!EnabledEI.Contains(int.Parse(XmlString.Attributes["EI"].Value)))
+                        {
+                            string pText = XmlString.InnerText.TrimStart();
+                            pText = pText.TrimEnd(new char[] { ' ' });
+                            pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
+                            windowText += pText;
+                        }
+                    }
+                    if (XmlString.Attributes["CI"] != null)
+                    {
+                        if (!EnabledCI.Contains(int.Parse(XmlString.Attributes["CI"].Value)))
+                        {
+                            string pText = XmlString.InnerText.TrimStart();
+                            pText = pText.TrimEnd(new char[] { ' ' });
+                            pText = SlashCommands(pText);
+                            preProcessed.Add(pText);
+
+                            windowText += pText;
+                        }
+                    }
+                }
+                #endregion
+
+                else
+                {
+                    string pText = XmlString.InnerText.TrimStart();
+                    pText = pText.TrimEnd(new char[] { ' ' });
+                    pText = SlashCommands(pText);
+                    preProcessed.Add(pText);
+
+                    windowText += pText;
+                }
+
+                if (windowText.Contains("//Break//"))
+                {
+                    preProcessed.Add(windowText);
+                    windowText = "";
+                }
+            }
+            return preProcessed;
+        }
+
+        public XmlNodeList Condition_Check(XmlNodeList option_XmlList, out bool input_Available, out bool roll_Available)
+        {
+            input_Available = false;
+            roll_Available = false;
+            XmlNodeList option_ReturnList = option_XmlList;
+
+            for(int i = 0; i<option_ReturnList.Count; i++)
+            {
+                XmlNode option_SingleNode = option_ReturnList[i];
+
+                if (option_SingleNode.SelectSingleNode("Conditions") != null)
+                {
+                    bool option_Validate = false;
+                    string[] option_Conditions = option_SingleNode.SelectSingleNode("Conditions").
+                                                 InnerText.Split(splitCharacters,
+                                                 StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string condition in option_Conditions)
+                    {
+                        //solve
+                        string pCondition = GetProperty(condition.Trim());
+                        pCondition = SolveStringLinking(pCondition);
+
+                        // check list if condition is valid this time
+                        if (option_Validate)
+                        {
+                            option_Validate = StringCalculator.Compare(pCondition);
+                        }
+
+                        //Removes invalid option and breaks condition checking
+                        if (!option_Validate)
+                        {
+                            option_ReturnList[i].ParentNode.RemoveChild(option_ReturnList[i]);
+                            break;
+                        }
+                    }
+                }
+                // checks if Roll and Input are in the option
+                if(option_SingleNode.SelectSingleNode("Input") != null)
+                {
+                    input_Available = true;
+                }
+                if(option_SingleNode.SelectSingleNode("Roll")!=null)
+                {
+                    roll_Available = true;
+                }
+                
+                
+            }
+            return option_ReturnList;
+        }
+
+        public void Input_SetTrigger(XmlNodeList option_XmlList, ref Label Opt_A, ref Label Opt_B, ref Label Opt_C, ref Label Opt_D)
+        {
+            int count = 0;
+            foreach (XmlNode option_SingleNode in option_XmlList)
+            {
+                XmlNode option_inputNode = option_SingleNode.SelectSingleNode("Input");
+
+                if (option_inputNode.Attributes["Tag"].Value == "Click")
+                {
+                    Recount:
+                    switch (count)
+                    {
+                        case 0:
+                            Opt_A.Text = option_inputNode.InnerText.Trim();
+                            count += 1;
+                            break;
+                        case 1:
+                            Opt_B.Text = option_inputNode.InnerText.Trim();
+                            count += 1;
+                            break;
+                        case 2:
+                            Opt_C.Text = option_inputNode.InnerText.Trim();
+                            count += 1;
+                            break;
+                        case 3:
+                            Opt_D.Text = option_inputNode.InnerText.Trim();
+                            count += 1;
+                            break;
+                        default:
+                            count = 0;
+                            goto Recount;
+                    }
+                }
+            }
+        }
+
+        
+
+        #endregion
 
         #endregion
 
