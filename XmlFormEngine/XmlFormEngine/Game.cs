@@ -35,14 +35,19 @@ namespace XmlFormEngine
         public CommandHandling currentHandling { get; set; }
         #endregion
         #region Private
+
+        //GamePlay
+        XmlDocument XmlFile_Current = new XmlDocument();
+        XmlNodeList command_List = null;
+        XmlNodeList command_ContentList = null;
         EventProcessor eventProcessor;
+        List<int> enabledEI = new List<int>();
+        int comList_I = 0;
 
         //Print
         List<string> sourceText = new List<string>();
 
         // Banch
-        XmlDocument XmlFile_Current = new XmlDocument();
-        XmlNodeList option_List = null;
         bool input_Available = false;
         bool roll_Available = false;
         #endregion
@@ -70,7 +75,7 @@ namespace XmlFormEngine
                         // clear the screen
                         break;
                     case EnterHandling.continueEvent:
-                        // maybe just default
+                        PrintWindow_TextProcessing();
                         break;
                     case EnterHandling.confirmInput:
                         break;
@@ -80,15 +85,57 @@ namespace XmlFormEngine
             }
         }
 
-        private void UpdateGame()
+        private void Update_Command()
+        {
+            bool Active = true;
+
+            while (Active)
+            {
+                if (command_List != null)
+                {
+                    XmlNode command = command_List[comList_I];
+                    comList_I += 1;
+
+                    // default command
+                    if (command.Attributes.Count == 0)
+                    {
+                        command_ContentList = command.ChildNodes;
+                    }
+
+                    // EI tag
+                    else if (enabledEI.Contains(int.Parse(command.Attributes["EI"].Value)))
+                    {
+                        command_ContentList = command.ChildNodes;
+                    }
+
+                    // TODO: check for CI tag
+
+                    // value reloop
+                    if (command.Name == "Branch")
+                    {
+                        Active = false;
+                    }
+                }
+                else
+                {
+                    Active = false;
+                }
+            }
+        }
+
+
+        private void Process_CommandContent()
         {
             Update_Start:
             switch (currentHandling)
             {
                 case CommandHandling.Print:
+                    sourceText = eventProcessor.Print_PreProcess(command_ContentList);
+                    PrintWindow_TextProcessing();
                     break;
+
                 case CommandHandling.Branch_Condition:
-                    option_List = eventProcessor.Condition_Check(option_List, out input_Available, out roll_Available);
+                    command_ContentList = eventProcessor.Condition_Check(command_ContentList, out input_Available, out roll_Available);
                     if (input_Available)
                     {
                         currentHandling = CommandHandling.Branch_Input;
@@ -100,15 +147,32 @@ namespace XmlFormEngine
                     goto Update_Start;
 
                 case CommandHandling.Branch_Input:
-                    eventProcessor.Input_SetTrigger(option_List, ref Opt_A, ref Opt_B, ref Opt_C, ref Opt_D);
+                    eventProcessor.Input_SetTrigger(command_ContentList, ref Opt_A, ref Opt_B, ref Opt_C, ref Opt_D);
                     break;
+
                 case CommandHandling.Branch_Roll:
                     break;
+
                 case CommandHandling.Branch_Result:
                     break;
                 default:
                     break;
             }
+        }
+
+        private void PrintWindow_TextProcessing()
+        {
+            if (sourceText.Count > 1)
+            {
+                enterHandle = EnterHandling.continueEvent;
+            }
+            else
+            {
+                enterHandle = EnterHandling.newEvent;
+            }
+
+            PrintWindow.Text += sourceText[0];
+            sourceText.Remove(sourceText[0]);
         }
 
 

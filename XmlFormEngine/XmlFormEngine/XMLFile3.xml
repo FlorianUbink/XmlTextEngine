@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Game>
+
+  <Event EI ="20">
+    <Print>
+      Test, No Attributes
+    </Print>
+    <Print EI ="21">
+      Test, Attribute 21
+    </Print>
+    
+  </Event>
+</Game>
