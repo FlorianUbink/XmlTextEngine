@@ -2,7 +2,7 @@
 
 <Game>
 
-  <Event EI ="20">
+  <E_20>
     <Print>
       Test, No Attributes
     </Print>
@@ -10,5 +10,5 @@
       Test, Attribute 21
     </Print>
     
-  </Event>
+  </E_20>
 </Game>

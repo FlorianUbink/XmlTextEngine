@@ -35,7 +35,8 @@ namespace XmlFormEngine
                     goto ChangedGamestate;
 
                 case GameState.Game:
-                    Application.Run(new GameWindow());
+                    Application.Run(new Game());
+                    //Application.Run(new GameWindow());
                     goto ChangedGamestate;
 
                 case GameState.Editor:

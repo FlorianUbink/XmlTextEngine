@@ -41,8 +41,11 @@ namespace XmlFormEngine
         XmlNodeList command_List = null;
         XmlNodeList command_ContentList = null;
         EventProcessor eventProcessor;
-        List<int> enabledEI = new List<int>();
+        Dictionary<string, string> XmlFileLibrary = new Dictionary<string, string>();
+        List<int> EI_Enabled = new List<int>();
         int comList_I = 0;
+        int EI_Current = 20;
+        int EI_Previous =-1;
 
         //Print
         List<string> sourceText = new List<string>();
@@ -62,26 +65,54 @@ namespace XmlFormEngine
 
         private void Game_Load(object sender, EventArgs e)
         {
+            #region Load XmlFileLibrary
+            XmlFileLibrary.Add("20-21", "XmlFile3.xml");
+            #endregion
             eventProcessor = new EventProcessor();
+            Update_CommandList();
+            Update_Command();
         }
 
-        private void Game_KeyPress(object sender, KeyPressEventArgs e)
+
+
+
+        private void XmlFileLoader()
         {
-            if (e.KeyChar == (char)Keys.Enter)
+            foreach (string range in XmlFileLibrary.Keys)
             {
-                switch (enterHandle)
+                string[] spectrum = range.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (EI_Current >= int.Parse(spectrum[0]) && EI_Current < int.Parse(spectrum[1]))
                 {
-                    case EnterHandling.newEvent:
-                        // clear the screen
-                        break;
-                    case EnterHandling.continueEvent:
-                        PrintWindow_TextProcessing();
-                        break;
-                    case EnterHandling.confirmInput:
-                        break;
-                    default:
-                        break;
+                    XmlFile_Current.Load((@"..\..\" + XmlFileLibrary[range]));
+                    break;
                 }
+            }
+
+            if (XmlFile_Current == null)
+            {
+                throw new Exception("Cant find:" + EI_Current);
+            }
+        }
+
+        private void Update_CommandList()
+        {
+            if (EI_Current != EI_Previous)
+            {
+                Start_EISearch:
+                if(command_List == null)
+                {
+                    XmlFileLoader();
+                }
+                string search = ("/Game/E_" + EI_Current);
+                command_List = XmlFile_Current.SelectSingleNode(search).ChildNodes;
+                if (command_List.Count == 0)
+                {
+                    XmlFileLoader();
+                    goto Start_EISearch;
+                }
+
+                EI_Previous = EI_Current;
             }
         }
 
@@ -100,18 +131,20 @@ namespace XmlFormEngine
                     if (command.Attributes.Count == 0)
                     {
                         command_ContentList = command.ChildNodes;
+                        Process_CommandContent();
                     }
 
                     // EI tag
-                    else if (enabledEI.Contains(int.Parse(command.Attributes["EI"].Value)))
+                    else if (EI_Enabled.Contains(int.Parse(command.Attributes["EI"].Value)))
                     {
                         command_ContentList = command.ChildNodes;
+                        Process_CommandContent();
                     }
 
                     // TODO: check for CI tag
 
                     // value reloop
-                    if (command.Name == "Branch")
+                    if (command.Name == "Branch"|| command_List.Count <= comList_I)
                     {
                         Active = false;
                     }
@@ -144,6 +177,10 @@ namespace XmlFormEngine
                     {
                         currentHandling = CommandHandling.Branch_Roll;
                     }
+                    else
+                    {
+                        currentHandling = CommandHandling.Branch_Result;
+                    }
                     goto Update_Start;
 
                 case CommandHandling.Branch_Input:
@@ -175,7 +212,22 @@ namespace XmlFormEngine
             sourceText.Remove(sourceText[0]);
         }
 
-
+        private void Game_Reset()
+        {
+            PrintWindow.Text = "";
+            Opt_A.Text = "";
+            Opt_B.Text = "";
+            Opt_C.Text = "";
+            Opt_D.Text = "";
+            Opt_A.Enabled = false;
+            Opt_B.Enabled = false;
+            Opt_C.Enabled = false;
+            Opt_D.Enabled = false;
+            Opt_A.Visible = false;
+            Opt_B.Visible = false;
+            Opt_C.Visible = false;
+            Opt_D.Visible = false;
+        }
 
 
 
@@ -230,6 +282,33 @@ namespace XmlFormEngine
 
         }
         #endregion
+
         #endregion
+
+        private void Game_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                switch (enterHandle)
+                {
+                    case EnterHandling.newEvent:
+                        Game_Reset();
+                        Update_CommandList();
+                        Update_Command();
+                        // debug link
+                        EI_Enabled.Add(21);
+                        EI_Current = 21;
+
+                        break;
+                    case EnterHandling.continueEvent:
+                        PrintWindow_TextProcessing();
+                        break;
+                    case EnterHandling.confirmInput:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 }

@@ -25,3 +25,12 @@ D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngi
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngine.exe.config
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.exe
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.pdb
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngine.exe
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngine.pdb
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\TextProcessing.pdb
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csprojResolveAssemblyReference.cache
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Game.resources
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.GameWindow.resources
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.MainMenu.resources
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Properties.Resources.resources
+C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csproj.GenerateResource.Cache
