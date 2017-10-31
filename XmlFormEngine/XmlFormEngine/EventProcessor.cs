@@ -52,6 +52,10 @@ namespace XmlFormEngine
 
         public EventProcessor()
         {
+            // experimental
+            BranchPresets.Load(@"..\..\BranchPresets.xml");
+
+
             #region LoadXmlLibrary
             XmlFileLibrary = new Dictionary<string, string>();
             XmlFileLibrary.Add("1-2", "XMLFile2.xml");
@@ -127,7 +131,7 @@ namespace XmlFormEngine
         }
         #endregion
 
-
+        #region OldIdea
         private void XmlFileLoader (int EI)
         {
             
@@ -148,7 +152,7 @@ namespace XmlFormEngine
             }   
         }
 
-        #region Command-functions
+
         private bool CommandProces(XmlNode CommandNode)
         {
 
@@ -315,7 +319,7 @@ namespace XmlFormEngine
 
             #endregion
 
-            #region Input
+            
             if (hasInput)
             {
                 List<string> inputOptions = new List<string>();
@@ -368,9 +372,159 @@ namespace XmlFormEngine
             }
         }
 
+        public void Branch2(XmlNodeList commandOL, string rollT)
+        {
+            List<string> resultIndexes = new List<string>();
+            rollTag = rollT;
+            XmlNodeList commandOptionList = commandOL;
+
+            #region Roll
+            if (hasRoll)
+            {
+                int diceRoll = dice.Next(0, 7);
+                resultIndexes.Clear();
+                XmlNode processNode = null;
+
+
+                foreach (XmlNode commandOption in commandOptionList)
+                {
+
+                    // select if node should be processed
+                    if (commandOption.Attributes["Tag"].InnerText == rollTag)
+                    {
+                        processNode = commandOption.SelectSingleNode("Roll");
+                    }
+
+                    else if (rollTag == "" && includedOptions.Contains(commandOption.Attributes["Tag"].InnerText))
+                    {
+                        processNode = commandOption.SelectSingleNode("Roll");
+                    }
+
+                    // processes node 
+                    if (processNode != null)
+                    {
+                        string rInner = processNode.InnerText;
+                        rInner = rInner.Trim();
+
+                        string[] splitConditions = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+
+                        bool firstTime = true;
+                        string rString = "";
+
+                        for (int i = 0; i < splitConditions.Count(); i++)
+                        {
+                            string pCondition = splitConditions[i].Trim();
+
+                            if (pCondition.Contains("Dice"))
+                            {
+                                pCondition = pCondition.Replace("Dice", diceRoll + "");
+                            }
+
+                            pCondition = GetProperty(pCondition);
+
+                            if (StringCalculator.Compare(pCondition))
+                            {
+                                if (firstTime)
+                                {
+                                    firstTime = false;
+                                    rString += rollTag;
+                                }
+                                rString += ("-" + i);
+                            }
+                        }
+                        resultIndexes.Add(rString);
+
+                        processNode = null;
+                    }
+                }
+            }
+
+            else
+            {
+                resultIndexes.Clear();
+                resultIndexes.Add(rollTag);
+            }
+
+            #endregion
+
+            #region Result
+            if (hasRoll)
+            {
+                foreach (string resultString in resultIndexes)
+                {
+                    string[] trueConditions = resultString.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] sResults = null;
+
+                    foreach (XmlNode commandOption in commandOptionList)
+                    {
+                        if (commandOption.Attributes["Tag"].InnerText == trueConditions[0])
+                        {
+                            string rInner = commandOption.SelectSingleNode("Result").InnerText;
+                            rInner = rInner.Trim();
+
+                            sResults = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                            break;
+                        }
+                    }
+
+                    trueConditions = trueConditions.Skip(1).ToArray();  // removes tag from array
+
+                    foreach (string index in trueConditions)
+                    {
+                        string rResult = sResults[int.Parse(index)];
+
+                        // result solve
+                        SetValueProperty(rResult);
+                        rResult = SolveStringLinking(rResult);
+                    }
+
+                }
+            }
+            else if (hasInput)
+            {
+                string[] results = null;
+
+                foreach (XmlNode commandOption in commandOptionList)
+                {
+                    if (commandOption.Attributes["Tag"].InnerText == rollTag)
+                    {
+                        string rInner = commandOption.SelectSingleNode("Result").InnerText;
+                        rInner = rInner.Trim();
+
+                        results = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                        break;
+
+                    }
+                }
+
+                foreach (string result in results)
+                {
+                    string rResult = result.Trim();
+                    //result solve
+                    SetValueProperty(rResult);
+                    rResult = SolveStringLinking(rResult);
+                }
+            }
+            #endregion
+
+            resetHandle();
+        }
+
+        #endregion
+
+
+
+
+
+
+
         #region Experimental: newIdea
-        bool input_Available = false;
-        bool roll_Available = false;
+
+        //bool input_Available = false;
+        //bool roll_Available = false;
+        XmlDocument BranchPresets = new XmlDocument();
+        
+
 
         public List<string> Print_PreProcess(XmlNodeList Print_List)
         {
@@ -509,186 +663,145 @@ namespace XmlFormEngine
 
         public void Input_SetTrigger(XmlNodeList option_XmlList, ref Label Opt_A, ref Label Opt_B, ref Label Opt_C, ref Label Opt_D)
         {
-            int count = 0;
             foreach (XmlNode option_SingleNode in option_XmlList)
             {
                 XmlNode option_inputNode = option_SingleNode.SelectSingleNode("Input");
-
                 if (option_inputNode.Attributes["Tag"].Value == "Click")
                 {
-                    Recount:
-                    switch (count)
+                    switch (option_SingleNode.Attributes["Tag"].Value)
                     {
-                        case 0:
+                        case "A":
                             Opt_A.Text = option_inputNode.InnerText.Trim();
-                            count += 1;
+                            Opt_A.Visible = true;
+                            Opt_A.Enabled = true;
                             break;
-                        case 1:
+                        case "B":
                             Opt_B.Text = option_inputNode.InnerText.Trim();
-                            count += 1;
+                            Opt_B.Visible = true;
+                            Opt_B.Enabled = true;
                             break;
-                        case 2:
+                        case "C":
                             Opt_C.Text = option_inputNode.InnerText.Trim();
-                            count += 1;
+                            Opt_C.Visible = true;
+                            Opt_C.Enabled = true;
                             break;
-                        case 3:
+                        case "D":
                             Opt_D.Text = option_inputNode.InnerText.Trim();
-                            count += 1;
+                            Opt_D.Visible = true;
+                            Opt_D.Enabled = true;
                             break;
                         default:
-                            count = 0;
-                            goto Recount;
+                            throw new Exception("InputNode: " + option_SingleNode.Attributes["Tag"].Value + ": Is not a valid Tag in context");
                     }
                 }
+                // TODO: solve for Type
             }
         }
 
-        
-
-        #endregion
-
-        #endregion
-
-        
-        public void Branch2(XmlNodeList commandOL, string rollT)
+        public XmlNodeList Roll_Solve(XmlNodeList option_XmlList, out string Result_Info)
         {
-            List<string> resultIndexes = new List<string>();
-            rollTag = rollT;
-            XmlNodeList commandOptionList = commandOL;
+            Result_Info = "";
+            int diceRoll = dice.Next(0, 7);
+            int returnIndex = -1;
+            XmlNodeList option_ReturnList = option_XmlList;
 
-            #region Roll
-            if (hasRoll)
+            for (int k = 0; k < option_XmlList.Count; k ++)
             {
-                int diceRoll = dice.Next(0, 7);
-                resultIndexes.Clear();
-                XmlNode processNode = null;
+                XmlNode option_SingleNode = option_XmlList[k];
 
+                XmlNodeList option_Roll = option_SingleNode.SelectSingleNode("Roll").ChildNodes;
+                XmlNodeList Roll_Set = null;
+                int set_Index = -1;
 
-                foreach (XmlNode commandOption in commandOptionList)
+                if (option_Roll[0].Name == "SetCondition")
                 {
+                    string[] set_Conditions = option_Roll[0].InnerText.Trim().Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
 
-                    // select if node should be processed
-                    if (commandOption.Attributes["Tag"].InnerText == rollTag)
+                    for (int i = 0; i<set_Conditions.Count();i++)
                     {
-                        processNode = commandOption.SelectSingleNode("Roll");
+                        //solve
+                        string pCondition = GetProperty(set_Conditions[i].Trim());
+                        pCondition = SolveStringLinking(pCondition);
+
+                        bool Valid = StringCalculator.Compare(pCondition);
+
+                        // returns first valid set
+                        if (Valid)
+                        {
+                            set_Index = i + 1;
+                            break;
+                        }
                     }
-
-                    else if (rollTag == "" && includedOptions.Contains(commandOption.Attributes["Tag"].InnerText))
+                    // if one set is valid than solve conditions
+                    if (set_Index != -1)
                     {
-                        processNode = commandOption.SelectSingleNode("Roll");
-                    }
+                        // check if set_Index points to a pre-set
+                        if (option_Roll[set_Index].Name.Contains("S_"))
+                        {
+                            string p_Name = option_Roll[set_Index].Name.Replace("a","");
+                            Roll_Set = BranchPresets.SelectSingleNode("/Game/Roll/" + p_Name).ChildNodes;
 
-                    // processes node 
-                    if (processNode != null)
-                    {
-                        string rInner = processNode.InnerText;
-                        rInner = rInner.Trim();
+                        }
+                        else
+                        {
+                            Roll_Set = option_Roll[set_Index].ChildNodes;
+                        }
 
-                        string[] splitConditions = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
 
                         bool firstTime = true;
                         string rString = "";
 
-                        for (int i = 0; i < splitConditions.Count(); i++)
+                        for (int j = 0; j < Roll_Set.Count; j++)
                         {
-                            string pCondition = splitConditions[i].Trim();
+                            string condition = Roll_Set[j].InnerText.Replace("\r\n", "").Trim();
 
-                            if (pCondition.Contains("Dice"))
+                            // solve condition
+
+                            if (condition.Contains("Dice"))
                             {
-                                pCondition = pCondition.Replace("Dice", diceRoll + "");
+                                condition = condition.Replace("Dice", diceRoll + "");
                             }
 
-                            pCondition = GetProperty(pCondition);
+                            condition = GetProperty(condition);
 
-                            if (StringCalculator.Compare(pCondition))
+                            if (StringCalculator.Compare(condition))
                             {
                                 if (firstTime)
                                 {
                                     firstTime = false;
-                                    rString += rollTag;
+                                    rString += option_Roll[set_Index].Name;
                                 }
-                                rString += ("-" + i);
+                                rString += ("-" + j);
                             }
                         }
-                        resultIndexes.Add(rString);
-
-                        processNode = null;
-                    }
-                }
-            }
-
-            else
-            {
-                resultIndexes.Clear();
-                resultIndexes.Add(rollTag);
-            }
-
-            #endregion
-
-            #region Result
-            if (hasRoll)
-            {
-                foreach (string resultString in resultIndexes)
-                {
-                    string[] trueConditions = resultString.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
-                    string[] sResults = null;
-
-                    foreach (XmlNode commandOption in commandOptionList)
-                    {
-                        if (commandOption.Attributes["Tag"].InnerText == trueConditions[0])
+                        // if any result is valid stop foreach
+                        if (rString != "")
                         {
-                            string rInner = commandOption.SelectSingleNode("Result").InnerText;
-                            rInner = rInner.Trim();
-
-                            sResults = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                            Result_Info = rString;
+                            returnIndex = k;
                             break;
                         }
+
                     }
 
-                    trueConditions = trueConditions.Skip(1).ToArray();  // removes tag from array
-
-                    foreach (string index in trueConditions)
+                    // remove unuses/false options
+                    for (int i = 0; i < option_ReturnList.Count; i++)
                     {
-                        string rResult = sResults[int.Parse(index)];
-
-                        // result solve
-                        SetValueProperty(rResult);
-                        rResult = SolveStringLinking(rResult);
+                        if (i != returnIndex)
+                        {
+                            option_ReturnList[i].ParentNode.RemoveChild(option_ReturnList[i]);
+                        }
                     }
+                    return option_ReturnList;
 
                 }
+
+
             }
-            else if (hasInput)
-            {
-                string[] results = null;
-
-                foreach (XmlNode commandOption in commandOptionList)
-                {
-                    if (commandOption.Attributes["Tag"].InnerText == rollTag)
-                    {
-                        string rInner = commandOption.SelectSingleNode("Result").InnerText;
-                        rInner = rInner.Trim();
-
-                        results = rInner.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
-                        break;
-
-                    }
-                }
-
-                foreach (string result in results)
-                {
-                    string rResult = result.Trim();
-                    //result solve
-                    SetValueProperty(rResult);
-                    rResult = SolveStringLinking(rResult);
-                }
-            }
-            #endregion
-            resetHandle();
         }
-    
+        
 
-    #endregion
+        #endregion
 
         #region Help-functions
 

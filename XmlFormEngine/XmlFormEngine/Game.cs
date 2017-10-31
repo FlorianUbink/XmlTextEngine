@@ -127,27 +127,35 @@ namespace XmlFormEngine
                     XmlNode command = command_List[comList_I];
                     comList_I += 1;
 
-                    // default command
-                    if (command.Attributes.Count == 0)
+                    if (command != null)
                     {
-                        command_ContentList = command.ChildNodes;
-                        Process_CommandContent();
+                        // default command
+                        if (command.Attributes.Count == 0)
+                        {
+                            command_ContentList = command.ChildNodes;
+                            Process_CommandContent();
+                        }
+
+                        // EI tag
+                        else if (EI_Enabled.Contains(int.Parse(command.Attributes["EI"].Value)))
+                        {
+                            command_ContentList = command.ChildNodes;
+                            Process_CommandContent();
+                        }
+
+                        // TODO: check for CI tag
+
+                        // value reloop
+                        if (command.Name == "Branch" || command_List.Count <= comList_I)
+                        {
+                            Active = false;
+                        }
                     }
-
-                    // EI tag
-                    else if (EI_Enabled.Contains(int.Parse(command.Attributes["EI"].Value)))
-                    {
-                        command_ContentList = command.ChildNodes;
-                        Process_CommandContent();
-                    }
-
-                    // TODO: check for CI tag
-
-                    // value reloop
-                    if (command.Name == "Branch"|| command_List.Count <= comList_I)
+                    else
                     {
                         Active = false;
                     }
+
                 }
                 else
                 {
@@ -295,10 +303,6 @@ namespace XmlFormEngine
                         Game_Reset();
                         Update_CommandList();
                         Update_Command();
-                        // debug link
-                        EI_Enabled.Add(21);
-                        EI_Current = 21;
-
                         break;
                     case EnterHandling.continueEvent:
                         PrintWindow_TextProcessing();

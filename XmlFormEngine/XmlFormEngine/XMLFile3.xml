@@ -6,9 +6,43 @@
     <Print>
       Test, No Attributes
     </Print>
+    
     <Print EI ="21">
       Test, Attribute 21
     </Print>
+
+    <Branch>
+      <Option Tag ="A">
+      
+        <Input Tag ="Click">
+        Clickme
+        </Input>
+
+        <Roll>
+          <SetCondition>
+            1
+            2
+            3
+          </SetCondition>
+          <RollSet>
+            a
+            b
+            c
+          </RollSet>
+          S_2a  // rollpreset of S_2
+          S_3a
+        </Roll>
+
+        <Result>
+          <ResultSet>
+            lllala
+          </ResultSet>
+          S_2b // resultpreset of S_2
+          S_3b
+        </Result>
+      
+      </Option>
+    </Branch>
     
   </E_20>
 </Game>
