@@ -53,6 +53,7 @@ namespace XmlFormEngine
         // Banch
         bool input_Available = false;
         bool roll_Available = false;
+        string result_Info = "";
         #endregion
         #endregion
 
@@ -196,6 +197,7 @@ namespace XmlFormEngine
                     break;
 
                 case CommandHandling.Branch_Roll:
+                    command_ContentList = eventProcessor.Roll_Solve(command_ContentList, out result_Info);
                     break;
 
                 case CommandHandling.Branch_Result:

@@ -700,7 +700,7 @@ namespace XmlFormEngine
 
         public XmlNodeList Roll_Solve(XmlNodeList option_XmlList, out string Result_Info)
         {
-            Result_Info = "";
+            Result_Info = ""; // Set + index info; if single: set = N
             int diceRoll = dice.Next(0, 7);
             int returnIndex = -1;
             XmlNodeList option_ReturnList = option_XmlList;
@@ -713,11 +713,13 @@ namespace XmlFormEngine
                 XmlNodeList Roll_Set = null;
                 int set_Index = -1;
 
+                #region Multiple-Rollset
                 if (option_Roll[0].Name == "SetCondition")
                 {
+                    // Check which set is to be loaded
                     string[] set_Conditions = option_Roll[0].InnerText.Trim().Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
 
-                    for (int i = 0; i<set_Conditions.Count();i++)
+                    for (int i = 0; i < set_Conditions.Count(); i++)
                     {
                         //solve
                         string pCondition = GetProperty(set_Conditions[i].Trim());
@@ -732,13 +734,13 @@ namespace XmlFormEngine
                             break;
                         }
                     }
-                    // if one set is valid than solve conditions
+                    // if any set is valid; solve conditions
                     if (set_Index != -1)
                     {
                         // check if set_Index points to a pre-set
                         if (option_Roll[set_Index].Name.Contains("S_"))
                         {
-                            string p_Name = option_Roll[set_Index].Name.Replace("a","");
+                            string p_Name = option_Roll[set_Index].Name;
                             Roll_Set = BranchPresets.SelectSingleNode("/Game/Roll/" + p_Name).ChildNodes;
 
                         }
@@ -750,7 +752,7 @@ namespace XmlFormEngine
 
                         bool firstTime = true;
                         string rString = "";
-
+                        // Check conditions in Roll_Set
                         for (int j = 0; j < Roll_Set.Count; j++)
                         {
                             string condition = Roll_Set[j].InnerText.Replace("\r\n", "").Trim();
@@ -784,22 +786,114 @@ namespace XmlFormEngine
 
                     }
 
-                    // remove unuses/false options
-                    for (int i = 0; i < option_ReturnList.Count; i++)
+                }
+                #endregion
+
+                #region Single-Rollset
+                else
+                {
+                    bool firstTime = true;
+                    string rString = "";
+                    for (int j = 0; j<option_Roll.Count;j++)
                     {
-                        if (i != returnIndex)
+                        string condition = option_Roll[j].InnerText.Trim();
+
+                        // solve condition
+
+                        if (condition.Contains("Dice"))
                         {
-                            option_ReturnList[i].ParentNode.RemoveChild(option_ReturnList[i]);
+                            condition = condition.Replace("Dice", diceRoll + "");
+                        }
+
+                        condition = GetProperty(condition);
+
+                        if (StringCalculator.Compare(condition))
+                        {
+                            if (firstTime)
+                            {
+                                firstTime = false;
+                                rString += "N";
+                            }
+                            rString += ("-" + j);
+                        }
+
+                    }
+                    // if any result is valid stop foreach
+                    if (rString != "")
+                    {
+                        Result_Info = rString;
+                        returnIndex = k;
+                        break;
+                    }
+                }
+                #endregion
+            }
+            // remove unuses/false options
+            for (int i = 0; i < option_ReturnList.Count; i++)
+            {
+                if (i != returnIndex)
+                {
+                    option_ReturnList[i].ParentNode.RemoveChild(option_ReturnList[i]);
+                }
+            }
+            return option_ReturnList;
+        }
+
+        public int Result_Solve(XmlNodeList option_XmlList, ref string Result_Info)
+        {
+            if (option_XmlList.Count == 1)
+            {
+                XmlNodeList Result_NodeList = option_XmlList[0].SelectSingleNode("Result").ChildNodes;
+                XmlNodeList Result_Set = null;
+                string[] Result_InfoList = Result_Info.Split(new char[] { '-' });
+                int returnEI = -1;
+
+                foreach (XmlNode ResultList_Node in Result_NodeList)
+                {
+                    if (Result_InfoList[0] == ResultList_Node.Name)
+                    {
+                        if (ResultList_Node.Name.Contains("S_"))
+                        {
+                            string p_Name = ResultList_Node.Name;
+                            Result_Set = BranchPresets.SelectSingleNode("/Game/Result/" + p_Name).ChildNodes;
+                            break;
+
+                        }
+                        else
+                        {
+                            Result_Set = ResultList_Node.ChildNodes;
+                            break;
                         }
                     }
-                    return option_ReturnList;
+                    else if (Result_InfoList[0] == "N")
+                    {
+                        Result_Set = Result_NodeList;
+                        break;
+                    }
+                }
+                bool firstRound = true;
 
+                foreach (string indexInfo in Result_InfoList)
+                {
+                    if (!firstRound)
+                    {
+                        XmlNode result = Result_Set[int.Parse(indexInfo)];
+                        SetValueProperty(result.InnerText.Trim());
+                        //returnEI = SolveStringLinking(result.InnerText.Trim()); //TODO: Link function is poor
+                    }
+                    else
+                    {
+                        firstRound = false;
+                    }
                 }
 
 
             }
+            else
+            {
+                throw new Exception("Error: optionlist not one: " + option_XmlList.Count);
+            }
         }
-        
 
         #endregion
 

@@ -29,16 +29,16 @@
             b
             c
           </RollSet>
-          S_2a  // rollpreset of S_2
-          S_3a
+          S_2
+          S_3
         </Roll>
 
         <Result>
           <ResultSet>
             lllala
           </ResultSet>
-          S_2b // resultpreset of S_2
-          S_3b
+          S_2
+          S_3
         </Result>
       
       </Option>
