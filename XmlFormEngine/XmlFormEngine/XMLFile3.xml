@@ -20,25 +20,22 @@
 
         <Roll>
           <SetCondition>
-            1
-            2
-            3
+            Player.Age > 2
+            Player.Age = 1
           </SetCondition>
-          <RollSet>
-            a
-            b
-            c
-          </RollSet>
-          S_2
-          S_3
+          <Set_1>
+            Player.Strength + 5 > Dice
+            Player.Age > Player.Strength
+          </Set_1>
+          S_1
         </Roll>
 
         <Result>
-          <ResultSet>
-            lllala
-          </ResultSet>
-          S_2
-          S_3
+          <Set_1>
+            Player.Age == 13
+            Link(13)
+          </Set_1>
+          S_1
         </Result>
       
       </Option>

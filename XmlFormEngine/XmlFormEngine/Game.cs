@@ -24,7 +24,8 @@ namespace XmlFormEngine
         Branch_Condition,
         Branch_Input,
         Branch_Roll,
-        Branch_Result
+        Branch_Result,
+        None
     }
 
     public partial class Game : Form
@@ -44,6 +45,7 @@ namespace XmlFormEngine
         Dictionary<string, string> XmlFileLibrary = new Dictionary<string, string>();
         List<int> EI_Enabled = new List<int>();
         int comList_I = 0;
+        int CI_Current = -1;
         int EI_Current = 20;
         int EI_Previous =-1;
 
@@ -131,20 +133,34 @@ namespace XmlFormEngine
                     if (command != null)
                     {
                         // default command
-                        if (command.Attributes.Count == 0)
+                        if (command.Attributes.Count == 0 && CI_Current == -1)
                         {
                             command_ContentList = command.ChildNodes;
+                            currentHandling = update_CurrentHandling(command.Name);
                             Process_CommandContent();
                         }
 
                         // EI tag
-                        else if (EI_Enabled.Contains(int.Parse(command.Attributes["EI"].Value)))
+                        else if (command.Attributes["EI"] != null)
                         {
-                            command_ContentList = command.ChildNodes;
-                            Process_CommandContent();
+                            if (EI_Enabled.Contains(int.Parse(command.Attributes["EI"].Value)) && CI_Current == -1)
+                            {
+                                command_ContentList = command.ChildNodes;
+                                currentHandling = update_CurrentHandling(command.Name);
+                                Process_CommandContent();
+                            }
                         }
 
-                        // TODO: check for CI tag
+                        // CI tag has priority over EI tag
+                        else if (command.Attributes["CI"] != null)
+                        {
+                            if (int.Parse(command.Attributes["CI"].Value) == CI_Current)
+                            {
+                                command_ContentList = command.ChildNodes;
+                                currentHandling = update_CurrentHandling(command.Name);
+                                Process_CommandContent();
+                            }
+                        }
 
                         // value reloop
                         if (command.Name == "Branch" || command_List.Count <= comList_I)
@@ -198,9 +214,11 @@ namespace XmlFormEngine
 
                 case CommandHandling.Branch_Roll:
                     command_ContentList = eventProcessor.Roll_Solve(command_ContentList, out result_Info);
-                    break;
+                    currentHandling = CommandHandling.Branch_Result;
+                    goto Update_Start;
 
                 case CommandHandling.Branch_Result:
+                    eventProcessor.Result_Solve(command_ContentList, ref result_Info, ref EI_Current, ref CI_Current, ref EI_Enabled);
                     break;
                 default:
                     break;
@@ -239,7 +257,16 @@ namespace XmlFormEngine
             Opt_D.Visible = false;
         }
 
-
+        private void Input_ContentListUpdate(ref XmlNodeList command_ContentList, string Optiontag)
+        {
+            for (int i = 0; i < command_ContentList.Count; i++)
+            {
+                if (command_ContentList[i].Attributes["Tag"].Value != Optiontag)
+                {
+                    command_ContentList[i].ParentNode.RemoveChild(command_ContentList[i]);
+                }
+            }
+        }
 
 
         private void PrintWindow_ContentsResized(object sender, ContentsResizedEventArgs e)
@@ -252,44 +279,72 @@ namespace XmlFormEngine
 
         private void Opt_A_MouseClick(object sender, MouseEventArgs e)
         {
-
+            Input_ContentListUpdate(ref command_ContentList, "A");
+            currentHandling = update_CurrentHandling(roll_Available);
+            Process_CommandContent();
         }
 
         private void Opt_B_MouseClick(object sender, MouseEventArgs e)
         {
-
+            Input_ContentListUpdate(ref command_ContentList, "B");
+            currentHandling = update_CurrentHandling(roll_Available);
+            Process_CommandContent();
         }
 
         private void Opt_C_MouseClick(object sender, MouseEventArgs e)
         {
-
+            Input_ContentListUpdate(ref command_ContentList, "C");
+            currentHandling = update_CurrentHandling(roll_Available);
+            Process_CommandContent();
         }
 
         private void Opt_D_MouseClick(object sender, MouseEventArgs e)
         {
-
+            Input_ContentListUpdate(ref command_ContentList, "D");
+            currentHandling = update_CurrentHandling(roll_Available);
+            Process_CommandContent();
         }
         #endregion
         #region HoverEvents
 
         private void Opt_A_MouseHover(object sender, EventArgs e)
         {
+            Opt_A.ForeColor = Color.Red;
+        }
 
+        private void Opt_A_MouseLeave(object sender, EventArgs e)
+        {
+            Opt_A.ForeColor = Color.Black;
         }
 
         private void Opt_B_MouseHover(object sender, EventArgs e)
         {
+            Opt_B.ForeColor = Color.Red;
+        }
 
+        private void Opt_B_MouseLeave(object sender, EventArgs e)
+        {
+            Opt_B.ForeColor = Color.Black;
         }
 
         private void Opt_C_MouseHover(object sender, EventArgs e)
         {
+            Opt_C.ForeColor = Color.Red;
+        }
 
+        private void Opt_C_MouseLeave(object sender, EventArgs e)
+        {
+            Opt_C.ForeColor = Color.Black;
         }
 
         private void Opt_D_MouseHover(object sender, EventArgs e)
         {
+            Opt_D.ForeColor = Color.Red;
+        }
 
+        private void Opt_D_MouseLeave(object sender, EventArgs e)
+        {
+            Opt_D.ForeColor = Color.Black;
         }
         #endregion
 
@@ -314,6 +369,39 @@ namespace XmlFormEngine
                     default:
                         break;
                 }
+            }
+        }
+
+        private void Game_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                Program.gameState = GameState.Exit;
+            }
+        }
+
+        private CommandHandling update_CurrentHandling(string command_Name)
+        {
+            switch (command_Name)
+            {
+                case "Print":
+                    return CommandHandling.Print;
+                case "Branch":
+                    return CommandHandling.Branch_Condition;
+                default:
+                    return CommandHandling.None;
+            }
+        }
+
+        private CommandHandling update_CurrentHandling(bool Roll_Available)
+        {
+            if (roll_Available)
+            {
+                return CommandHandling.Branch_Roll;
+            }
+            else
+            {
+                return CommandHandling.Branch_Result;
             }
         }
     }

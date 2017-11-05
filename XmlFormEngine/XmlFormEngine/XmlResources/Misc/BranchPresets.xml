@@ -4,13 +4,15 @@
   <Roll>
 
     <S_1>
-      
+      Player.Strength = Dice
+      Player.Age > Player.Strength
     </S_1>
     
   </Roll>
   <Result>
     <S_1>
-      
+      Player.Strength = 13
+      Link(21)
     </S_1>
     
   </Result>

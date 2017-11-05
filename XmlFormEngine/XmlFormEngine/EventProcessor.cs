@@ -53,7 +53,7 @@ namespace XmlFormEngine
         public EventProcessor()
         {
             // experimental
-            BranchPresets.Load(@"..\..\BranchPresets.xml");
+            BranchPresets.Load(@"..\..\XmlResources\Misc\BranchPresets.xml");
 
 
             #region LoadXmlLibrary
@@ -710,7 +710,7 @@ namespace XmlFormEngine
                 XmlNode option_SingleNode = option_XmlList[k];
 
                 XmlNodeList option_Roll = option_SingleNode.SelectSingleNode("Roll").ChildNodes;
-                XmlNodeList Roll_Set = null;
+                string[] Roll_Set = null;
                 int set_Index = -1;
 
                 #region Multiple-Rollset
@@ -741,21 +741,23 @@ namespace XmlFormEngine
                         if (option_Roll[set_Index].Name.Contains("S_"))
                         {
                             string p_Name = option_Roll[set_Index].Name;
-                            Roll_Set = BranchPresets.SelectSingleNode("/Game/Roll/" + p_Name).ChildNodes;
+                            string raw_Set = BranchPresets.SelectSingleNode("/Game/Roll/" + p_Name).InnerText.Replace(" ", "");
+                            Roll_Set = raw_Set.Split(splitCharacters,StringSplitOptions.RemoveEmptyEntries);
 
                         }
                         else
                         {
-                            Roll_Set = option_Roll[set_Index].ChildNodes;
+                            string raw_Set = option_Roll[set_Index].InnerText.Replace(" ", "");
+                            Roll_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
                         }
 
 
                         bool firstTime = true;
                         string rString = "";
                         // Check conditions in Roll_Set
-                        for (int j = 0; j < Roll_Set.Count; j++)
+                        for (int j = 0; j < Roll_Set.Count(); j++)
                         {
-                            string condition = Roll_Set[j].InnerText.Replace("\r\n", "").Trim();
+                            string condition = Roll_Set[j].Trim();
 
                             // solve condition
 
@@ -839,14 +841,14 @@ namespace XmlFormEngine
             return option_ReturnList;
         }
 
-        public int Result_Solve(XmlNodeList option_XmlList, ref string Result_Info)
+        public void Result_Solve(XmlNodeList option_XmlList, ref string Result_Info, ref int EI_Current, ref int CI_Current, ref List<int> EI_Enabled)
         {
             if (option_XmlList.Count == 1)
             {
                 XmlNodeList Result_NodeList = option_XmlList[0].SelectSingleNode("Result").ChildNodes;
-                XmlNodeList Result_Set = null;
+                string[] Result_Set = null;
                 string[] Result_InfoList = Result_Info.Split(new char[] { '-' });
-                int returnEI = -1;
+                int ReturnedValue = -1;
 
                 foreach (XmlNode ResultList_Node in Result_NodeList)
                 {
@@ -855,19 +857,22 @@ namespace XmlFormEngine
                         if (ResultList_Node.Name.Contains("S_"))
                         {
                             string p_Name = ResultList_Node.Name;
-                            Result_Set = BranchPresets.SelectSingleNode("/Game/Result/" + p_Name).ChildNodes;
+                            string raw_Set = BranchPresets.SelectSingleNode("/Game/Result/" + p_Name).InnerText.Replace(" ", "");
+                            Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
                             break;
 
                         }
                         else
                         {
-                            Result_Set = ResultList_Node.ChildNodes;
+                            string raw_Set = ResultList_Node.InnerText.Replace(" ", "");
+                            Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
                             break;
                         }
                     }
                     else if (Result_InfoList[0] == "N")
                     {
-                        Result_Set = Result_NodeList;
+                        string raw_Set = Result_NodeList[0].InnerText.Replace(" ", "");
+                        Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
                         break;
                     }
                 }
@@ -877,16 +882,22 @@ namespace XmlFormEngine
                 {
                     if (!firstRound)
                     {
-                        XmlNode result = Result_Set[int.Parse(indexInfo)];
-                        SetValueProperty(result.InnerText.Trim());
-                        //returnEI = SolveStringLinking(result.InnerText.Trim()); //TODO: Link function is poor
+                        string result = Result_Set[int.Parse(indexInfo)];
+                        SetValueProperty(result.Trim());
+                        ReturnedValue = EventIdentificationLinking(result.Trim(), ref EI_Current, ref CI_Current);
+
+                        if (ReturnedValue != -1)
+                        {
+                            EI_Enabled.Add(ReturnedValue);
+                        }
+
                     }
+                    // To NOT process the Result_Set name as Result
                     else
                     {
                         firstRound = false;
                     }
                 }
-
 
             }
             else
@@ -913,7 +924,7 @@ namespace XmlFormEngine
                     if (pString.Contains(cInfo.Name))
                     {
                         int indexStart = pString.IndexOf(cInfo.Name);
-                        int indexEnd = pString.IndexOfAny(new char[] { ' ' }, indexStart);
+                        int indexEnd = pString.IndexOfAny(new char[] { ' ', '+', '-','*','/','>','<','=','!', }, indexStart);
                         if (indexEnd == -1)
                         {
                             indexEnd = pString.Length;
@@ -1015,22 +1026,72 @@ namespace XmlFormEngine
 
                     float pArgument = StringCalculator.Solve(argument);
 
-                    string[] itemArray = GetPropertyArray(sCall[0]);
-                    string pOp = op.Replace("=", "");
+                    string[] itemArray = GetPropertyArray(sCall[0]);//
+                    double newValue = double.NaN;
 
-                    double newValue = StringCalculator.Solve(itemArray[2] + pOp + pArgument);
+                    string pOp = op;
+                    if (pOp == "==")
+                    {
+                        newValue = pArgument;
+                    }
+                    else
+                    {
+                        pOp = op.Replace("=", "");
+                        newValue = StringCalculator.Solve(itemArray[2] + pOp + pArgument);
+                    }
+
+                    
 
                     SetProperty(itemArray[0], itemArray[1], newValue);
                     break;
                 }
             }
         }
+
+
+
         #endregion
 
         public static void SetInputString(string input)
         {
             WindowInput = input;
         }
+
+
+        private int EventIdentificationLinking(string call, ref int EI_Current, ref int CI_Current)
+        {
+            if (call.IndexOf('(') != -1)
+            {
+                string callID = call.Substring(call.IndexOf('('));
+                string callIdentifier = call.Replace(callID, "").Trim();
+                callID = callID.Replace("(", "");
+                callID = callID.Replace(")", "");
+                switch (callIdentifier)
+                {
+                    case "Link":
+                        EI_Current = int.Parse(callID);
+                        CI_Current = -1;
+                        return int.Parse(callID);
+
+                    case "Enable":
+                        int EI_Enabled = int.Parse(callID);
+                        return EI_Enabled;
+
+                    case "To":
+                        CI_Current = int.Parse(callID);
+                        return -1;
+
+                    default:
+                        return -1;
+                }
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+
 
 
         private string SolveStringLinking(string callString)
