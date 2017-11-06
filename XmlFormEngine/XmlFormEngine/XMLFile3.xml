@@ -15,7 +15,7 @@
       <Option Tag ="A">
       
         <Input Tag ="Click">
-        Clickme
+        One
         </Input>
 
         <Roll>
@@ -33,13 +33,53 @@
         <Result>
           <Set_1>
             Player.Age == 13
-            Link(13)
+            Link(21)
           </Set_1>
           S_1
         </Result>
       
       </Option>
+
+      <Option Tag ="B">
+
+        <Input Tag ="Click">
+          Two
+        </Input>
+
+        <Roll>
+          <SetCondition>
+            Player.Age > 2
+            Player.Age = 1
+          </SetCondition>
+          <Set_1>
+            Player.Strength + 5 > Dice
+            Player.Age > Player.Strength
+          </Set_1>
+          S_1
+        </Roll>
+
+        <Result>
+          <Set_1>
+            Player.Age == 13
+            Link(21)
+          </Set_1>
+          S_1
+        </Result>
+
+      </Option>
     </Branch>
     
   </E_20>
+  <E_21>
+    <Print>
+      This is set 21
+    </Print>
+
+    <Print EI ="20">
+      Your comming from set 20
+    </Print>
+    
+    
+  </E_21>
+  
 </Game>

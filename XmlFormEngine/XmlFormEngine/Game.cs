@@ -15,7 +15,8 @@ namespace XmlFormEngine
     {
         newEvent,
         continueEvent,
-        confirmInput
+        confirmInput,
+        disabled
     }
 
     public enum CommandHandling
@@ -34,6 +35,7 @@ namespace XmlFormEngine
         #region Public
         public EnterHandling enterHandle { get; set; }
         public CommandHandling currentHandling { get; set; }
+        public int PrintWindow_YValue { get; set; }
         #endregion
         #region Private
 
@@ -46,7 +48,7 @@ namespace XmlFormEngine
         List<int> EI_Enabled = new List<int>();
         int comList_I = 0;
         int CI_Current = -1;
-        int EI_Current = 20;
+        int EI_Current = -1;
         int EI_Previous =-1;
 
         //Print
@@ -68,6 +70,12 @@ namespace XmlFormEngine
 
         private void Game_Load(object sender, EventArgs e)
         {
+            #region DebugLoad
+            EI_Current = 20;
+            EI_Enabled.Add(20);
+            #endregion
+
+
             #region Load XmlFileLibrary
             XmlFileLibrary.Add("20-21", "XmlFile3.xml");
             #endregion
@@ -116,6 +124,7 @@ namespace XmlFormEngine
                 }
 
                 EI_Previous = EI_Current;
+                comList_I = 0;
             }
         }
 
@@ -197,6 +206,7 @@ namespace XmlFormEngine
                     if (input_Available)
                     {
                         currentHandling = CommandHandling.Branch_Input;
+                        enterHandle = EnterHandling.disabled;
                     }
                     else if (roll_Available)
                     {
@@ -255,6 +265,8 @@ namespace XmlFormEngine
             Opt_B.Visible = false;
             Opt_C.Visible = false;
             Opt_D.Visible = false;
+            enterHandle = EnterHandling.newEvent;
+            PrintWindow_YValue = 0;
         }
 
         private void Input_ContentListUpdate(ref XmlNodeList command_ContentList, string Optiontag)
@@ -271,17 +283,25 @@ namespace XmlFormEngine
 
         private void PrintWindow_ContentsResized(object sender, ContentsResizedEventArgs e)
         {
-
+            if (PrintWindow.Text != "")
+            {
+                PrintWindow_YValue = e.NewRectangle.Bottom;
+            }
         }
 
-        #region OptionEvents
-        #region ClickEvents
+        #region Option_Label_Events
+        
+        #region Click
 
         private void Opt_A_MouseClick(object sender, MouseEventArgs e)
         {
             Input_ContentListUpdate(ref command_ContentList, "A");
             currentHandling = update_CurrentHandling(roll_Available);
             Process_CommandContent();
+            Game_Reset();
+            Update_CommandList();
+            Update_Command();
+
         }
 
         private void Opt_B_MouseClick(object sender, MouseEventArgs e)
@@ -289,6 +309,9 @@ namespace XmlFormEngine
             Input_ContentListUpdate(ref command_ContentList, "B");
             currentHandling = update_CurrentHandling(roll_Available);
             Process_CommandContent();
+            Game_Reset();
+            Update_CommandList();
+            Update_Command();
         }
 
         private void Opt_C_MouseClick(object sender, MouseEventArgs e)
@@ -296,6 +319,9 @@ namespace XmlFormEngine
             Input_ContentListUpdate(ref command_ContentList, "C");
             currentHandling = update_CurrentHandling(roll_Available);
             Process_CommandContent();
+            Game_Reset();
+            Update_CommandList();
+            Update_Command();
         }
 
         private void Opt_D_MouseClick(object sender, MouseEventArgs e)
@@ -303,9 +329,51 @@ namespace XmlFormEngine
             Input_ContentListUpdate(ref command_ContentList, "D");
             currentHandling = update_CurrentHandling(roll_Available);
             Process_CommandContent();
+            Game_Reset();
+            Update_CommandList();
+            Update_Command();
         }
         #endregion
-        #region HoverEvents
+
+        #region Resize
+        private void Opt_A_TextChanged(object sender, EventArgs e)
+        {
+            if (Opt_A.Text != "")
+            {
+                Opt_A.Location = new Point(PrintWindow.Location.X, PrintWindow_YValue + 5);
+                PrintWindow_YValue = Opt_A.Height + Opt_A.Location.Y;
+            }
+        }
+
+        private void Opt_B_TextChanged(object sender, EventArgs e)
+        {
+            if (Opt_B.Text != "")
+            {
+                Opt_B.Location = new Point(PrintWindow.Location.X, PrintWindow_YValue + 5);
+                PrintWindow_YValue = Opt_B.Height + Opt_B.Location.Y;
+            }
+        }
+
+        private void Opt_C_TextChanged(object sender, EventArgs e)
+        {
+            if (Opt_C.Text != "")
+            {
+                Opt_C.Location = new Point(PrintWindow.Location.X, PrintWindow_YValue + 5);
+                PrintWindow_YValue = Opt_C.Height + Opt_C.Location.Y;
+            }
+        }
+
+        private void Opt_D_TextChanged(object sender, EventArgs e)
+        {
+            if (Opt_D.Text != "")
+            {
+                Opt_D.Location = new Point(PrintWindow.Location.X, PrintWindow_YValue + 5);
+                PrintWindow_YValue = Opt_D.Height + Opt_D.Location.Y;
+            }
+        }
+        #endregion
+
+        #region Hover
 
         private void Opt_A_MouseHover(object sender, EventArgs e)
         {
@@ -360,9 +428,13 @@ namespace XmlFormEngine
                         Game_Reset();
                         Update_CommandList();
                         Update_Command();
+                        e.Handled = true;
+                        e.SuppressKeyPress = true;
                         break;
                     case EnterHandling.continueEvent:
                         PrintWindow_TextProcessing();
+                        e.Handled = true;
+                        e.SuppressKeyPress = true;
                         break;
                     case EnterHandling.confirmInput:
                         break;
@@ -404,5 +476,7 @@ namespace XmlFormEngine
                 return CommandHandling.Branch_Result;
             }
         }
+
+
     }
 }

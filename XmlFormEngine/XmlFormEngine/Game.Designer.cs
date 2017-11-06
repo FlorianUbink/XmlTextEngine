@@ -1,7 +1,10 @@
-﻿namespace XmlFormEngine
+﻿using System.Drawing;
+
+namespace XmlFormEngine
 {
     partial class Game
     {
+        public Color OptionBackgroundColors { get; set; }
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -41,6 +44,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PrintWindow.BackColor = System.Drawing.SystemColors.ControlDark;
+            OptionBackgroundColors = PrintWindow.BackColor;
             this.PrintWindow.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.PrintWindow.Cursor = System.Windows.Forms.Cursors.Default;
             this.PrintWindow.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -57,13 +61,18 @@
             // 
             this.Opt_A.AutoSize = true;
             this.Opt_A.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            Opt_A.BackColor = OptionBackgroundColors;
+
             this.Opt_A.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Opt_A.Enabled = false;
             this.Opt_A.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Opt_A.Location = new System.Drawing.Point(419, 101);
             this.Opt_A.Name = "Opt_A";
             this.Opt_A.Size = new System.Drawing.Size(45, 19);
             this.Opt_A.TabIndex = 1;
             this.Opt_A.Text = "OptA";
+            this.Opt_A.Visible = false;
+            this.Opt_A.TextChanged += new System.EventHandler(this.Opt_A_TextChanged);
             this.Opt_A.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Opt_A_MouseClick);
             this.Opt_A.MouseLeave += new System.EventHandler(this.Opt_A_MouseLeave);
             this.Opt_A.MouseHover += new System.EventHandler(this.Opt_A_MouseHover);
@@ -72,13 +81,17 @@
             // 
             this.Opt_B.AutoSize = true;
             this.Opt_B.BackColor = System.Drawing.SystemColors.Menu;
+            Opt_B.BackColor = OptionBackgroundColors;
             this.Opt_B.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Opt_B.Enabled = false;
             this.Opt_B.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Opt_B.Location = new System.Drawing.Point(419, 138);
             this.Opt_B.Name = "Opt_B";
             this.Opt_B.Size = new System.Drawing.Size(45, 19);
             this.Opt_B.TabIndex = 2;
             this.Opt_B.Text = "OptB";
+            this.Opt_B.Visible = false;
+            this.Opt_B.TextChanged += new System.EventHandler(this.Opt_B_TextChanged);
             this.Opt_B.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Opt_B_MouseClick);
             this.Opt_B.MouseLeave += new System.EventHandler(this.Opt_B_MouseLeave);
             this.Opt_B.MouseHover += new System.EventHandler(this.Opt_B_MouseHover);
@@ -87,13 +100,17 @@
             // 
             this.Opt_C.AutoSize = true;
             this.Opt_C.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            Opt_C.BackColor = OptionBackgroundColors;
             this.Opt_C.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Opt_C.Enabled = false;
             this.Opt_C.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Opt_C.Location = new System.Drawing.Point(419, 173);
             this.Opt_C.Name = "Opt_C";
             this.Opt_C.Size = new System.Drawing.Size(45, 19);
             this.Opt_C.TabIndex = 3;
             this.Opt_C.Text = "OptC";
+            this.Opt_C.Visible = false;
+            this.Opt_C.TextChanged += new System.EventHandler(this.Opt_C_TextChanged);
             this.Opt_C.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Opt_C_MouseClick);
             this.Opt_C.MouseLeave += new System.EventHandler(this.Opt_C_MouseLeave);
             this.Opt_C.MouseHover += new System.EventHandler(this.Opt_C_MouseHover);
@@ -102,13 +119,17 @@
             // 
             this.Opt_D.AutoSize = true;
             this.Opt_D.BackColor = System.Drawing.SystemColors.Menu;
+            Opt_D.BackColor = OptionBackgroundColors;
             this.Opt_D.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Opt_D.Enabled = false;
             this.Opt_D.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Opt_D.Location = new System.Drawing.Point(419, 203);
             this.Opt_D.Name = "Opt_D";
             this.Opt_D.Size = new System.Drawing.Size(46, 19);
             this.Opt_D.TabIndex = 4;
             this.Opt_D.Text = "OptD";
+            this.Opt_D.Visible = false;
+            this.Opt_D.TextChanged += new System.EventHandler(this.Opt_D_TextChanged);
             this.Opt_D.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Opt_D_MouseClick);
             this.Opt_D.MouseLeave += new System.EventHandler(this.Opt_D_MouseLeave);
             this.Opt_D.MouseHover += new System.EventHandler(this.Opt_D_MouseHover);
