@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Game>
+  
+  
+<General>
+  081117a
+</General>
+
+<XmlLibrary>
+  1-2,XMLFile2.xml
+  10-13,XMLFile1.xml
+  20-25,XMLFile3.xml
+</XmlLibrary>
+
+<Font>
+  default font
+  default size
+  default color   
+</Font>
+
+
+
+
+
+
+</Game>

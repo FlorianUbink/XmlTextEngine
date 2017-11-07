@@ -30,7 +30,6 @@ C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debu
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\bin\Debug\TextProcessing.pdb
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csprojResolveAssemblyReference.cache
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Game.resources
-C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.GameWindow.resources
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.MainMenu.resources
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Properties.Resources.resources
 C:\Users\Florian\Source\Repos\XmlTextEngine\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csproj.GenerateResource.Cache

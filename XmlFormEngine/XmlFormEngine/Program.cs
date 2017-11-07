@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace XmlFormEngine
 {
@@ -25,17 +26,22 @@ namespace XmlFormEngine
         [STAThread]
         static void Main()
         {
+            XmlDocument XmlFile_Settings = new XmlDocument();
+            XmlFile_Settings.Load(@"..\..\XmlResources\Misc\Settings.xml");
+            string[] general = XmlFile_Settings.SelectSingleNode("/Game/General").InnerText.
+                                                Split(new string[] { "\r\n" },StringSplitOptions.RemoveEmptyEntries);
+
             gameState = GameState.MainMenu;
 
             ChangedGamestate:
             switch (gameState)
             {
                 case GameState.MainMenu:
-                    Application.Run(new MainMenu());
+                    Application.Run(new MainMenu(general[0]));
                     goto ChangedGamestate;
 
                 case GameState.Game:
-                    Application.Run(new Game());
+                    Application.Run(new Game(XmlFile_Settings));
                     //Application.Run(new GameWindow());
                     goto ChangedGamestate;
 

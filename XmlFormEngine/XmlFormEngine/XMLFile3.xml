@@ -20,11 +20,11 @@
 
         <Roll>
           <SetCondition>
-            Player.Age > 2
+            isEIEnabled(21) + Player.Age > 2
             Player.Age = 1
           </SetCondition>
           <Set_1>
-            Player.Strength + 5 > Dice
+            Player.Strength +2 > D(7)
             Player.Age > Player.Strength
           </Set_1>
           S_1
@@ -52,7 +52,7 @@
             Player.Age = 1
           </SetCondition>
           <Set_1>
-            Player.Strength + 5 > Dice
+            Player.Strength + 5 > D(7)
             Player.Age > Player.Strength
           </Set_1>
           S_1

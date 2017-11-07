@@ -40,7 +40,8 @@ namespace XmlFormEngine
         #region Private
 
         //GamePlay
-        XmlDocument XmlFile_Current = new XmlDocument();
+        XmlDocument XmlFile_Gamefile = new XmlDocument();
+        XmlDocument SettingXml = null;
         XmlNodeList command_List = null;
         XmlNodeList command_ContentList = null;
         EventProcessor eventProcessor;
@@ -61,11 +62,11 @@ namespace XmlFormEngine
         #endregion
         #endregion
 
-
-
-        public Game()
+        #region Pre-Game
+        public Game(XmlDocument settingXml)
         {
             InitializeComponent();
+            SettingXml = settingXml;
         }
 
         private void Game_Load(object sender, EventArgs e)
@@ -75,18 +76,27 @@ namespace XmlFormEngine
             EI_Enabled.Add(20);
             #endregion
 
-
             #region Load XmlFileLibrary
-            XmlFileLibrary.Add("20-21", "XmlFile3.xml");
+            string entry = SettingXml.SelectSingleNode("/Game/XmlLibrary").InnerText;
+            string[] entry_split = entry.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string file in entry_split)
+            {
+                string longString = file.Trim().Replace(" ", "");
+                string[] split = longString.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                XmlFileLibrary.Add(split[0], split[1]);
+            }
+            
             #endregion
-            eventProcessor = new EventProcessor();
+            eventProcessor = new EventProcessor(this);
+
             Update_CommandList();
             Update_Command();
         }
 
+        #endregion
 
-
-
+        #region Content distribution
         private void XmlFileLoader()
         {
             foreach (string range in XmlFileLibrary.Keys)
@@ -95,12 +105,12 @@ namespace XmlFormEngine
 
                 if (EI_Current >= int.Parse(spectrum[0]) && EI_Current < int.Parse(spectrum[1]))
                 {
-                    XmlFile_Current.Load((@"..\..\" + XmlFileLibrary[range]));
+                    XmlFile_Gamefile.Load((@"..\..\" + XmlFileLibrary[range]));
                     break;
                 }
             }
 
-            if (XmlFile_Current == null)
+            if (XmlFile_Gamefile == null)
             {
                 throw new Exception("Cant find:" + EI_Current);
             }
@@ -116,7 +126,7 @@ namespace XmlFormEngine
                     XmlFileLoader();
                 }
                 string search = ("/Game/E_" + EI_Current);
-                command_List = XmlFile_Current.SelectSingleNode(search).ChildNodes;
+                command_List = XmlFile_Gamefile.SelectSingleNode(search).ChildNodes;
                 if (command_List.Count == 0)
                 {
                     XmlFileLoader();
@@ -190,7 +200,6 @@ namespace XmlFormEngine
             }
         }
 
-
         private void Process_CommandContent()
         {
             Update_Start:
@@ -235,6 +244,9 @@ namespace XmlFormEngine
             }
         }
 
+        #endregion
+
+        #region Command-Related
         private void PrintWindow_TextProcessing()
         {
             if (sourceText.Count > 1)
@@ -250,25 +262,6 @@ namespace XmlFormEngine
             sourceText.Remove(sourceText[0]);
         }
 
-        private void Game_Reset()
-        {
-            PrintWindow.Text = "";
-            Opt_A.Text = "";
-            Opt_B.Text = "";
-            Opt_C.Text = "";
-            Opt_D.Text = "";
-            Opt_A.Enabled = false;
-            Opt_B.Enabled = false;
-            Opt_C.Enabled = false;
-            Opt_D.Enabled = false;
-            Opt_A.Visible = false;
-            Opt_B.Visible = false;
-            Opt_C.Visible = false;
-            Opt_D.Visible = false;
-            enterHandle = EnterHandling.newEvent;
-            PrintWindow_YValue = 0;
-        }
-
         private void Input_ContentListUpdate(ref XmlNodeList command_ContentList, string Optiontag)
         {
             for (int i = 0; i < command_ContentList.Count; i++)
@@ -279,7 +272,45 @@ namespace XmlFormEngine
                 }
             }
         }
+        #endregion
 
+        #region Event-Related
+
+        #region Console
+        private void Game_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                switch (enterHandle)
+                {
+                    case EnterHandling.newEvent:
+                        Game_Reset();
+                        Update_CommandList();
+                        Update_Command();
+                        e.Handled = true;
+                        e.SuppressKeyPress = true;
+                        break;
+                    case EnterHandling.continueEvent:
+                        PrintWindow_TextProcessing();
+                        e.Handled = true;
+                        e.SuppressKeyPress = true;
+                        break;
+                    case EnterHandling.confirmInput:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void Game_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                Program.gameState = GameState.Exit;
+            }
+        }
+        #endregion
 
         private void PrintWindow_ContentsResized(object sender, ContentsResizedEventArgs e)
         {
@@ -289,8 +320,8 @@ namespace XmlFormEngine
             }
         }
 
-        #region Option_Label_Events
-        
+        #region Opt_Labels
+
         #region Click
 
         private void Opt_A_MouseClick(object sender, MouseEventArgs e)
@@ -418,40 +449,29 @@ namespace XmlFormEngine
 
         #endregion
 
-        private void Game_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Enter)
-            {
-                switch (enterHandle)
-                {
-                    case EnterHandling.newEvent:
-                        Game_Reset();
-                        Update_CommandList();
-                        Update_Command();
-                        e.Handled = true;
-                        e.SuppressKeyPress = true;
-                        break;
-                    case EnterHandling.continueEvent:
-                        PrintWindow_TextProcessing();
-                        e.Handled = true;
-                        e.SuppressKeyPress = true;
-                        break;
-                    case EnterHandling.confirmInput:
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
+        #endregion
 
-        private void Game_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                Program.gameState = GameState.Exit;
-            }
-        }
+        #region Help functions
 
+        private void Game_Reset()
+        {
+            PrintWindow.Text = "";
+            Opt_A.Text = "";
+            Opt_B.Text = "";
+            Opt_C.Text = "";
+            Opt_D.Text = "";
+            Opt_A.Enabled = false;
+            Opt_B.Enabled = false;
+            Opt_C.Enabled = false;
+            Opt_D.Enabled = false;
+            Opt_A.Visible = false;
+            Opt_B.Visible = false;
+            Opt_C.Visible = false;
+            Opt_D.Visible = false;
+            enterHandle = EnterHandling.newEvent;
+            PrintWindow_YValue = 0;
+        }
+        #region CommandHandeling
         private CommandHandling update_CurrentHandling(string command_Name)
         {
             switch (command_Name)
@@ -476,7 +496,97 @@ namespace XmlFormEngine
                 return CommandHandling.Branch_Result;
             }
         }
+        #endregion
 
+        public string LinkingInformationLoad(string call)
+        {
+            bool Active = true;
+            string returnString = call;
+
+            while (Active)
+            {
+                #region EventIdentifier
+                if (returnString.Contains("isEIEnabled"))
+                {
+                    int start = returnString.IndexOf('(', returnString.IndexOf("isEIEnabled"));
+                    int end = returnString.IndexOf(')', start) - 1;
+                    int EI = int.Parse(returnString.Substring(start + 1, end - start));
+                    int validation = -1;
+
+                    for (int i = 0; i < EI_Enabled.Count; i++)
+                    {
+                        if (EI == EI_Enabled[i])
+                        {
+                            validation = 1;
+                            break;
+                        }
+                        else if (i == EI_Enabled.Count - 1)
+                        {
+                            validation = 0;
+                            break;
+                        }
+                    }
+                    returnString = returnString.Replace("isEIEnabled(" + EI + ')', validation + "");
+                }
+                else if (returnString.Contains("isEICurrent"))
+                {
+                    int start = returnString.IndexOf('(', returnString.IndexOf("isEIEnabled"));
+                    int end = returnString.IndexOf(')', start);
+                    int EI = int.Parse(returnString.Substring(start + 1, end - start));
+                    int validation = -1;
+
+                    if (EI == EI_Current) { validation = 1; }
+
+                    else { validation = 0; }
+
+                    returnString = returnString.Replace("isEICurrent(" + EI + ')', validation + "");
+                }
+                #endregion
+
+                #region CI_Identifier
+                //if (returnString.Contains("isCIEnabled"))
+                //{
+                //    int start = returnString.IndexOf('(', returnString.IndexOf("isCIEnabled"));
+                //    int end = returnString.IndexOf(')', start);
+                //    int CI = int.Parse(returnString.Substring(start + 1, end - start));
+                //    int validation = -1;
+
+                //    for (int i = 0; i < CI_Enabled.Count; i++)
+                //    {
+                //        if (CI == CI_Enabled[i])
+                //        {
+                //            validation = 1;
+                //            break;
+                //        }
+                //        else if (i == CI_Enabled.Count - 1)
+                //        {
+                //            validation = 0;
+                //            break;
+                //        }
+                //    }
+                //    returnString = returnString.Replace("isCIEnabled(" + CI + ')', validation + "");
+                //}
+                else if (returnString.Contains("isCICurrent"))
+                {
+                    int start = returnString.IndexOf('(', returnString.IndexOf("isCIEnabled"));
+                    int end = returnString.IndexOf(')', start);
+                    int CI = int.Parse(returnString.Substring(start + 1, end - start));
+                    int validation = -1;
+
+                    if (CI == CI_Current) { validation = 1; }
+
+                    else { validation = 0; }
+
+                    returnString = returnString.Replace("isCICurrent(" + CI + ')', validation + "");
+                }
+                #endregion
+
+                else { Active = false; }
+            }
+            return returnString;
+        }
+
+        #endregion
 
     }
 }

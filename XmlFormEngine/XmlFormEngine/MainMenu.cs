@@ -12,9 +12,10 @@ namespace XmlFormEngine
 {
     public partial class MainMenu : Form
     {
-        public MainMenu()
+        public MainMenu(string version)
         {
             InitializeComponent();
+            Label_Version.Text = "V" + version.Trim();
         }
 
         private void MainMenu_Load(object sender, EventArgs e)
@@ -35,14 +36,6 @@ namespace XmlFormEngine
         {
             Program.gameState = GameState.Game;
             this.Dispose();
-
-        }
-
-        private void Editor_Button_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Function comming soon ! :D");
-
-            //Program.gameState = GameState.Editor;
 
         }
     }
