@@ -42,7 +42,6 @@ namespace XmlFormEngine
 
         #endregion
         
-        #region Experimental: newIdea
 
         XmlDocument BranchPresets = new XmlDocument();
 
@@ -64,7 +63,7 @@ namespace XmlFormEngine
                         {
                             string pText = XmlString.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = SlashCommands(pText);
+                            pText = GetProperty(pText);
                             preProcessed.Add(pText);
 
                             windowText += pText;
@@ -76,7 +75,7 @@ namespace XmlFormEngine
                         {
                             string pText = XmlString.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = SlashCommands(pText);
+                            pText = GetProperty(pText);
                             preProcessed.Add(pText);
 
                             windowText += pText;
@@ -91,7 +90,7 @@ namespace XmlFormEngine
                         {
                             string pText = XmlString.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = SlashCommands(pText);
+                            pText = GetProperty(pText);
                             preProcessed.Add(pText);
 
                             windowText += pText;
@@ -103,7 +102,7 @@ namespace XmlFormEngine
                         {
                             string pText = XmlString.InnerText.TrimStart();
                             pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = SlashCommands(pText);
+                            pText = GetProperty(pText);
                             preProcessed.Add(pText);
 
                             windowText += pText;
@@ -116,15 +115,16 @@ namespace XmlFormEngine
                 {
                     string pText = XmlString.InnerText.TrimStart();
                     pText = pText.TrimEnd(new char[] { ' ' });
-                    pText = SlashCommands(pText);
+                    pText = GetProperty(pText);
                     preProcessed.Add(pText);
 
                     windowText += pText;
                 }
 
-                if (windowText.Contains("//Break//"))
+                if (windowText.Contains("//BREAK//"))
                 {
-                    preProcessed.Add(windowText);
+                    string[] breakSplit = windowText.Split(new string[] { "//BREAK//" }, StringSplitOptions.RemoveEmptyEntries);
+                    preProcessed.AddRange(breakSplit);
                     windowText = "";
                 }
             }
@@ -184,8 +184,11 @@ namespace XmlFormEngine
             return option_ReturnList;
         }
 
-        public void Input_SetTrigger(XmlNodeList option_XmlList, ref Label Opt_A, ref Label Opt_B, ref Label Opt_C, ref Label Opt_D)
+        public void Input_SetTrigger(XmlNodeList option_XmlList, ref EnterHandling enterHandle, ref Dictionary<string, string> Opt_type,ref RichTextBox Opt_TypeBox,
+                                                                 ref Label Opt_A, ref Label Opt_B, ref Label Opt_C, ref Label Opt_D)
         {
+            Opt_type.Clear();
+
             foreach (XmlNode option_SingleNode in option_XmlList)
             {
                 XmlNode option_inputNode = option_SingleNode.SelectSingleNode("Input");
@@ -217,7 +220,26 @@ namespace XmlFormEngine
                             throw new Exception("InputNode: " + option_SingleNode.Attributes["Tag"].Value + ": Is not a valid Tag in context");
                     }
                 }
-                // TODO: solve for Type
+                else if (option_inputNode.Attributes["Tag"].Value == "Type")
+                {
+                    if (!Opt_TypeBox.Enabled)
+                    {
+                        enterHandle = EnterHandling.confirmInput;
+                        Opt_TypeBox.Enabled = true;
+                        Opt_TypeBox.Visible = true;
+                    }
+
+                    string option_Tag = option_SingleNode.Attributes["Tag"].Value;
+                    string rawTypeConditions = option_inputNode.InnerText.Replace(" ", "");
+                    string[] option_typeConditions = rawTypeConditions.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string condition in option_typeConditions)
+                    {
+                        string pCondition = condition.ToUpper();
+
+                        Opt_type.Add(pCondition, option_Tag);
+                    }
+                }
             }
         }
 
@@ -435,7 +457,7 @@ namespace XmlFormEngine
         #endregion
 
         #endregion
-        #endregion
+
 
         #region Help-functions
 

@@ -17,7 +17,6 @@ D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngi
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\bin\Debug\XmlFormEngine.pdb
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\bin\Debug\TextProcessing.pdb
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csprojResolveAssemblyReference.cache
-D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.GameWindow.resources
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.MainMenu.resources
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.Properties.Resources.resources
 D:\Repositories\TextEngineForm\XmlFormEngine\XmlFormEngine\obj\Debug\XmlFormEngine.csproj.GenerateResource.Cache

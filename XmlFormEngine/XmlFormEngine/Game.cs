@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -33,13 +34,13 @@ namespace XmlFormEngine
     {
         #region Properties
         #region Public
-        public EnterHandling enterHandle { get; set; }
         public CommandHandling currentHandling { get; set; }
         public int PrintWindow_YValue { get; set; }
         #endregion
         #region Private
 
         //GamePlay
+        EnterHandling enterHandle;
         XmlDocument XmlFile_Gamefile = new XmlDocument();
         XmlDocument SettingXml = null;
         XmlNodeList command_List = null;
@@ -56,9 +57,11 @@ namespace XmlFormEngine
         List<string> sourceText = new List<string>();
 
         // Banch
+        Dictionary<string, string> Opt_type = new Dictionary<string, string>();
         bool input_Available = false;
         bool roll_Available = false;
         string result_Info = "";
+        string Type_ErrorMessage = "\n Sorry, I dont know what u mean by that.\n";
         #endregion
         #endregion
 
@@ -89,6 +92,7 @@ namespace XmlFormEngine
             
             #endregion
             eventProcessor = new EventProcessor(this);
+            PrintWindow.TabStop = false;
 
             Update_CommandList();
             Update_Command();
@@ -228,7 +232,8 @@ namespace XmlFormEngine
                     goto Update_Start;
 
                 case CommandHandling.Branch_Input:
-                    eventProcessor.Input_SetTrigger(command_ContentList, ref Opt_A, ref Opt_B, ref Opt_C, ref Opt_D);
+                    eventProcessor.Input_SetTrigger(command_ContentList, ref enterHandle, ref Opt_type, ref Opt_TypeBox, 
+                                                                         ref Opt_A, ref Opt_B, ref Opt_C, ref Opt_D);
                     break;
 
                 case CommandHandling.Branch_Roll:
@@ -296,6 +301,28 @@ namespace XmlFormEngine
                         e.SuppressKeyPress = true;
                         break;
                     case EnterHandling.confirmInput:
+                        PrintWindow.Text = PrintWindow.Text.Replace(Type_ErrorMessage, " ");
+                        string input = Opt_TypeBox.Text.Replace(" ", "");
+                        input = input.ToUpper();
+
+                        if (Opt_type.ContainsKey(input))
+                        {
+                            Input_ContentListUpdate(ref command_ContentList, Opt_type[input]);
+                            currentHandling = update_CurrentHandling(roll_Available);
+                            Process_CommandContent();
+                            Game_Reset();
+                            Update_CommandList();
+                            Update_Command();
+                            e.Handled = true;
+                            e.SuppressKeyPress = true;
+                        }
+                        else
+                        {
+                            Opt_TypeBox.Text = "";
+                            PrintWindow.Text += Type_ErrorMessage;
+                        }
+
+
                         break;
                     default:
                         break;
@@ -316,8 +343,9 @@ namespace XmlFormEngine
         {
             if (PrintWindow.Text != "")
             {
-                PrintWindow_YValue = e.NewRectangle.Bottom;
+                PrintWindow_YValue = e.NewRectangle.Bottom + 20;
             }
+
         }
 
         #region Opt_Labels
@@ -402,6 +430,12 @@ namespace XmlFormEngine
                 PrintWindow_YValue = Opt_D.Height + Opt_D.Location.Y;
             }
         }
+
+        private void Opt_TypeBox_EnabledChanged(object sender, EventArgs e)
+        {
+            Opt_TypeBox.Location = new Point(PrintWindow.Location.X + 5, PrintWindow_YValue + 10);
+            PrintWindow_YValue = Opt_TypeBox.Height + Opt_TypeBox.Location.Y;
+        }
         #endregion
 
         #region Hover
@@ -456,14 +490,17 @@ namespace XmlFormEngine
         private void Game_Reset()
         {
             PrintWindow.Text = "";
+            Opt_TypeBox.Text = "";
             Opt_A.Text = "";
             Opt_B.Text = "";
             Opt_C.Text = "";
             Opt_D.Text = "";
+            Opt_TypeBox.Enabled = false;
             Opt_A.Enabled = false;
             Opt_B.Enabled = false;
             Opt_C.Enabled = false;
             Opt_D.Enabled = false;
+            Opt_TypeBox.Visible = false;
             Opt_A.Visible = false;
             Opt_B.Visible = false;
             Opt_C.Visible = false;
@@ -587,6 +624,7 @@ namespace XmlFormEngine
         }
 
         #endregion
+
 
     }
 }

@@ -4,7 +4,7 @@
 
   <E_20>
     <Print>
-      Test, No Attributes
+      Test, No Attributes//BREAK// maybe it does
     </Print>
     
     <Print EI ="21">
@@ -42,7 +42,7 @@
 
       <Option Tag ="B">
 
-        <Input Tag ="Click">
+        <Input Tag ="Type">
           Two
         </Input>
 

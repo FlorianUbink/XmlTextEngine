@@ -4,7 +4,7 @@ namespace XmlFormEngine
 {
     partial class Game
     {
-        public Color OptionBackgroundColors { get; set; }
+        Color BackgroundColor;
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -36,6 +36,7 @@ namespace XmlFormEngine
             this.Opt_B = new System.Windows.Forms.Label();
             this.Opt_C = new System.Windows.Forms.Label();
             this.Opt_D = new System.Windows.Forms.Label();
+            this.Opt_TypeBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // PrintWindow
@@ -44,7 +45,6 @@ namespace XmlFormEngine
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PrintWindow.BackColor = System.Drawing.SystemColors.ControlDark;
-            OptionBackgroundColors = PrintWindow.BackColor;
             this.PrintWindow.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.PrintWindow.Cursor = System.Windows.Forms.Cursors.Default;
             this.PrintWindow.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -60,9 +60,7 @@ namespace XmlFormEngine
             // Opt_A
             // 
             this.Opt_A.AutoSize = true;
-            this.Opt_A.BackColor = System.Drawing.SystemColors.MenuHighlight;
-            Opt_A.BackColor = OptionBackgroundColors;
-
+            this.Opt_A.BackColor = System.Drawing.SystemColors.ControlDark;
             this.Opt_A.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Opt_A.Enabled = false;
             this.Opt_A.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -80,8 +78,7 @@ namespace XmlFormEngine
             // Opt_B
             // 
             this.Opt_B.AutoSize = true;
-            this.Opt_B.BackColor = System.Drawing.SystemColors.Menu;
-            Opt_B.BackColor = OptionBackgroundColors;
+            this.Opt_B.BackColor = System.Drawing.SystemColors.ControlDark;
             this.Opt_B.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Opt_B.Enabled = false;
             this.Opt_B.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -99,8 +96,7 @@ namespace XmlFormEngine
             // Opt_C
             // 
             this.Opt_C.AutoSize = true;
-            this.Opt_C.BackColor = System.Drawing.SystemColors.MenuHighlight;
-            Opt_C.BackColor = OptionBackgroundColors;
+            this.Opt_C.BackColor = System.Drawing.SystemColors.ControlDark;
             this.Opt_C.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Opt_C.Enabled = false;
             this.Opt_C.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -118,8 +114,7 @@ namespace XmlFormEngine
             // Opt_D
             // 
             this.Opt_D.AutoSize = true;
-            this.Opt_D.BackColor = System.Drawing.SystemColors.Menu;
-            Opt_D.BackColor = OptionBackgroundColors;
+            this.Opt_D.BackColor = System.Drawing.SystemColors.ControlDark;
             this.Opt_D.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Opt_D.Enabled = false;
             this.Opt_D.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -134,11 +129,27 @@ namespace XmlFormEngine
             this.Opt_D.MouseLeave += new System.EventHandler(this.Opt_D_MouseLeave);
             this.Opt_D.MouseHover += new System.EventHandler(this.Opt_D_MouseHover);
             // 
+            // Opt_TypeBox
+            // 
+            this.Opt_TypeBox.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Opt_TypeBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.Opt_TypeBox.Enabled = false;
+            this.Opt_TypeBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Opt_TypeBox.Location = new System.Drawing.Point(339, 411);
+            this.Opt_TypeBox.Multiline = false;
+            this.Opt_TypeBox.Name = "Opt_TypeBox";
+            this.Opt_TypeBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.Opt_TypeBox.Size = new System.Drawing.Size(228, 29);
+            this.Opt_TypeBox.TabIndex = 5;
+            this.Opt_TypeBox.Text = "";
+            this.Opt_TypeBox.EnabledChanged += new System.EventHandler(this.Opt_TypeBox_EnabledChanged);
+            // 
             // Game
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(944, 501);
+            this.Controls.Add(this.Opt_TypeBox);
             this.Controls.Add(this.Opt_D);
             this.Controls.Add(this.Opt_C);
             this.Controls.Add(this.Opt_B);
@@ -163,5 +174,6 @@ namespace XmlFormEngine
         private System.Windows.Forms.Label Opt_B;
         private System.Windows.Forms.Label Opt_C;
         private System.Windows.Forms.Label Opt_D;
+        private System.Windows.Forms.RichTextBox Opt_TypeBox;
     }
 }
