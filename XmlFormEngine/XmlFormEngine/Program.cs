@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace XmlFormEngine
 {
@@ -32,6 +33,19 @@ namespace XmlFormEngine
                                                 Split(new string[] { "\r\n" },StringSplitOptions.RemoveEmptyEntries);
 
             gameState = GameState.MainMenu;
+
+            #region XDocument - test
+
+            //var doc =XDocument.Load(@"..\..\XmlResources/Characters/Playable.xml");
+
+            //Player0 player = new Player0
+            //{
+            //    Name = doc.Root.Element("Player4").Element("a").Value,
+            //    Age = int.Parse(doc.Root.Element("Player4").Element("b").Value),
+            //    Strength = int.Parse(doc.Root.Element("Player4").Element("c").Value),
+            //};
+
+            #endregion
 
             ChangedGamestate:
             switch (gameState)

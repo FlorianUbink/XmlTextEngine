@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Game>
+  <Player4>
+    <a>A</a>
+    <b>9</b>
+    <c>1</c>
+  </Player4>
+  <Player1>
+    <a>B</a>
+    <b>1</b>
+    <c>4</c>
+  </Player1>
+  <Player2>
+    <a>C</a>
+    <b>7</b>
+    <c>6</c>
+  </Player2>
+</Game>
