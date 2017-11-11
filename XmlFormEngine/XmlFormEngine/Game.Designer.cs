@@ -31,12 +31,14 @@ namespace XmlFormEngine
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.PrintWindow = new System.Windows.Forms.RichTextBox();
             this.Opt_A = new System.Windows.Forms.Label();
             this.Opt_B = new System.Windows.Forms.Label();
             this.Opt_C = new System.Windows.Forms.Label();
             this.Opt_D = new System.Windows.Forms.Label();
             this.Opt_TypeBox = new System.Windows.Forms.RichTextBox();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // PrintWindow
@@ -56,6 +58,8 @@ namespace XmlFormEngine
             this.PrintWindow.TabIndex = 0;
             this.PrintWindow.Text = "";
             this.PrintWindow.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.PrintWindow_ContentsResized);
+            this.PrintWindow.SelectionChanged += new System.EventHandler(this.PrintWindow_SelectionChanged);
+            this.PrintWindow.TextChanged += new System.EventHandler(this.PrintWindow_TextChanged);
             // 
             // Opt_A
             // 
@@ -144,6 +148,11 @@ namespace XmlFormEngine
             this.Opt_TypeBox.Text = "";
             this.Opt_TypeBox.EnabledChanged += new System.EventHandler(this.Opt_TypeBox_EnabledChanged);
             // 
+            // timer2
+            // 
+            this.timer2.Enabled = true;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Game
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -175,5 +184,6 @@ namespace XmlFormEngine
         private System.Windows.Forms.Label Opt_C;
         private System.Windows.Forms.Label Opt_D;
         private System.Windows.Forms.RichTextBox Opt_TypeBox;
+        private System.Windows.Forms.Timer timer2;
     }
 }

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -36,6 +38,7 @@ namespace XmlFormEngine
         #region Public
         public CommandHandling currentHandling { get; set; }
         public int PrintWindow_YValue { get; set; }
+        public object SystemDraw { get; private set; }
         #endregion
         #region Private
 
@@ -52,9 +55,14 @@ namespace XmlFormEngine
         int CI_Current = -1;
         int EI_Current = -1;
         int EI_Previous =-1;
-
+        bool Update_Active = true;
+        int tickCount = 0;
         //Print
         List<string> sourceText = new List<string>();
+        int printStart = 0;
+        int lineStart = 0;
+        XmlNodeList PrintList_Processed = null;
+        int sec = 0;
 
         // Banch
         Dictionary<string, string> Opt_type = new Dictionary<string, string>();
@@ -70,6 +78,7 @@ namespace XmlFormEngine
         {
             InitializeComponent();
             SettingXml = settingXml;
+            
         }
 
         private void Game_Load(object sender, EventArgs e)
@@ -93,6 +102,7 @@ namespace XmlFormEngine
             #endregion
             eventProcessor = new EventProcessor(this);
             PrintWindow.TabStop = false;
+            Game_Reset();
 
             Update_CommandList();
             Update_Command();
@@ -124,6 +134,7 @@ namespace XmlFormEngine
         {
             if (EI_Current != EI_Previous)
             {
+                Update_Active = true;
                 Start_EISearch:
                 if(command_List == null)
                 {
@@ -144,9 +155,8 @@ namespace XmlFormEngine
 
         private void Update_Command()
         {
-            bool Active = true;
-
-            while (Active)
+            //Update_Active = true;
+            while (Update_Active)
             {
                 if (command_List != null)
                 {
@@ -188,18 +198,18 @@ namespace XmlFormEngine
                         // value reloop
                         if (command.Name == "Branch" || command_List.Count <= comList_I)
                         {
-                            Active = false;
+                            Update_Active = false;
                         }
                     }
                     else
                     {
-                        Active = false;
+                        Update_Active = false;
                     }
 
                 }
                 else
                 {
-                    Active = false;
+                    Update_Active = false;
                 }
             }
         }
@@ -210,8 +220,8 @@ namespace XmlFormEngine
             switch (currentHandling)
             {
                 case CommandHandling.Print:
-                    sourceText = eventProcessor.Print_PreProcess(command_ContentList);
-                    PrintWindow_TextProcessing();
+                    PrintList_Processed = eventProcessor.Print_PreProcess(command_ContentList, ref EI_Enabled);
+                    PrintWindow_TextProcessing(PrintList_Processed);
                     break;
 
                 case CommandHandling.Branch_Condition:
@@ -251,20 +261,56 @@ namespace XmlFormEngine
 
         #endregion
 
-        #region Command-Related
-        private void PrintWindow_TextProcessing()
+        #region Command Functions
+        private void PrintWindow_TextProcessing(XmlNodeList printList)
         {
-            if (sourceText.Count > 1)
+            sec = 0;
+            for (int i = printStart; i < printList.Count; i++)
             {
-                enterHandle = EnterHandling.continueEvent;
-            }
-            else
-            {
-                enterHandle = EnterHandling.newEvent;
-            }
 
-            PrintWindow.Text += sourceText[0];
-            sourceText.Remove(sourceText[0]);
+                XmlNode printNode = printList[i];
+                if (printNode.HasChildNodes)
+                {
+                    
+                    for (int j = lineStart; j < printNode.ChildNodes.Count; j++)
+                    {
+                        XmlNode line = printNode.ChildNodes[j];
+                        switch (line.Name)
+                        {
+                            case "LC":
+                                string innerCommand = line.InnerText.ToUpper().Replace(" ", "");
+                                if (innerCommand == "WAITINPUT")
+                                {
+                                    enterHandle = EnterHandling.continueEvent;
+                                    printStart = i;
+                                    lineStart = j + 1;
+                                    Update_Active = false;
+                                    goto End;
+                                }
+                                else if (innerCommand.Contains("WAIT"))
+                                {
+                                    sec = int.Parse(innerCommand.Replace("WAIT", ""));
+                                    printStart = i;
+                                    lineStart = j + 1;
+                                    Update_Active = false;
+                                    timer2.Start();
+                                    goto End;
+                                }
+                                break;
+                            default:
+                                PrintWindow.Text += line.InnerText;
+                                break;
+                        }
+                    }
+                    lineStart = 0;
+                }
+                else
+                {
+                    PrintWindow.Text += printNode.InnerText;
+                }
+            }
+        End: {  }
+
         }
 
         private void Input_ContentListUpdate(ref XmlNodeList command_ContentList, string Optiontag)
@@ -286,20 +332,26 @@ namespace XmlFormEngine
         {
             if (e.KeyData == Keys.Enter)
             {
+                
                 switch (enterHandle)
                 {
                     case EnterHandling.newEvent:
                         Game_Reset();
+                    ReHandle:
+                        Update_Active = true;
+                        lineStart = 0;
+                        printStart = 0;
                         Update_CommandList();
                         Update_Command();
                         e.Handled = true;
                         e.SuppressKeyPress = true;
                         break;
                     case EnterHandling.continueEvent:
-                        PrintWindow_TextProcessing();
+                        PrintWindow_TextProcessing(PrintList_Processed);
                         e.Handled = true;
                         e.SuppressKeyPress = true;
-                        break;
+                        enterHandle = EnterHandling.newEvent;
+                        goto ReHandle;
                     case EnterHandling.confirmInput:
                         PrintWindow.Text = PrintWindow.Text.Replace(Type_ErrorMessage, " ");
                         string input = Opt_TypeBox.Text.Replace(" ", "");
@@ -623,8 +675,38 @@ namespace XmlFormEngine
             return returnString;
         }
 
+
         #endregion
 
+        [DllImport("user32.dll")]
+        static extern bool HideCaret(IntPtr hWnd);
+        private void PrintWindow_SelectionChanged(object sender, EventArgs e)
+        {
+            PrintWindow.SelectionLength = 0;
+            HideCaret(PrintWindow.Handle);
+        }
 
+
+        private void PrintWindow_TextChanged(object sender, EventArgs e)
+        {
+            HideCaret(PrintWindow.Handle);
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if (sec != 0)
+            {
+                tickCount += timer2.Interval;
+                if (tickCount >= sec * 1000)
+                {
+                    timer2.Stop();
+                    tickCount = 0;
+                    PrintWindow_TextProcessing(PrintList_Processed);
+                    Update_CommandList();
+                    Update_Command();
+                    Update_Active = true;
+                }
+            }
+        }
     }
 }

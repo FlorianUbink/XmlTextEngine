@@ -47,88 +47,85 @@ namespace XmlFormEngine
 
         #region Commands
 
-        public List<string> Print_PreProcess(XmlNodeList Print_List)
+        public XmlNodeList Print_PreProcess(XmlNodeList Preprocessed_PrintList, ref List<int> EI_Enabled)
         {
-            List<string> preProcessed = new List<string>();
-            string windowText = "";
+            XmlNodeList Processed_PrintList = Preprocessed_PrintList;
+            bool Else_Active = true;
 
-            foreach (XmlNode XmlString in Print_List)
+
+            for (int i = 0; i<Processed_PrintList.Count; i++)
             {
-                #region Enable/Disable nodes
-                if (XmlString.Name == "Enable")
+                XmlNode XmlString = Processed_PrintList[i];
+                //Default; always visable
+                if (XmlString.Name.Contains("default"))
                 {
-                    if (XmlString.Attributes["EI"] != null)
+                    if (XmlString.HasChildNodes)
                     {
-                        if (EnabledEI.Contains(int.Parse(XmlString.Attributes["EI"].Value)))
+                        for(int j = 0; j<XmlString.ChildNodes.Count; j++)
                         {
-                            string pText = XmlString.InnerText.TrimStart();
-                            pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = GetProperty(pText);
-                            preProcessed.Add(pText);
-
-                            windowText += pText;
+                            XmlNode line = XmlString.ChildNodes[j];
+                            if (line.Name != "LC")
+                            {
+                                string processed_Inner = GetProperty(line.InnerText);
+                                XmlString.ChildNodes[j].InnerText = processed_Inner;
+                            }
                         }
+                        Processed_PrintList[i].ParentNode.ReplaceChild(XmlString, Processed_PrintList[i]);
                     }
-                    if (XmlString.Attributes["CI"] != null)
-                    {
-                        if (EnabledCI.Contains(int.Parse(XmlString.Attributes["CI"].Value)))
-                        {
-                            string pText = XmlString.InnerText.TrimStart();
-                            pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = GetProperty(pText);
-                            preProcessed.Add(pText);
 
-                            windowText += pText;
-                        }
-                    }
-                }
-                else if (XmlString.Name == "Disable")
-                {
-                    if (XmlString.Attributes["EI"] != null)
-                    {
-                        if (!EnabledEI.Contains(int.Parse(XmlString.Attributes["EI"].Value)))
-                        {
-                            string pText = XmlString.InnerText.TrimStart();
-                            pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = GetProperty(pText);
-                            preProcessed.Add(pText);
 
-                            windowText += pText;
-                        }
-                    }
-                    if (XmlString.Attributes["CI"] != null)
-                    {
-                        if (!EnabledCI.Contains(int.Parse(XmlString.Attributes["CI"].Value)))
-                        {
-                            string pText = XmlString.InnerText.TrimStart();
-                            pText = pText.TrimEnd(new char[] { ' ' });
-                            pText = GetProperty(pText);
-                            preProcessed.Add(pText);
 
-                            windowText += pText;
-                        }
-                    }
-                }
-                #endregion
-
-                else
-                {
-                    string pText = XmlString.InnerText.TrimStart();
-                    pText = pText.TrimEnd(new char[] { ' ' });
-                    pText = GetProperty(pText);
-                    preProcessed.Add(pText);
-
-                    windowText += pText;
                 }
 
-                if (windowText.Contains("//BREAK//"))
+                //Contains EI
+                if (XmlString.Name.Contains("E_"))
                 {
-                    string[] breakSplit = windowText.Split(new string[] { "//BREAK//" }, StringSplitOptions.RemoveEmptyEntries);
-                    preProcessed.AddRange(breakSplit);
-                    windowText = "";
+                    int EI = int.Parse(XmlString.Name.Replace("E_", ""));
+                    if (EI_Enabled.Contains(EI))
+                    {
+                        if (XmlString.HasChildNodes)
+                        {
+                            for (int j = 0; j < XmlString.ChildNodes.Count; j++)
+                            {
+                                XmlNode line = XmlString.ChildNodes[j];
+                                if (line.Name != "LC")
+                                {
+                                    string processed_Inner = GetProperty(line.InnerText);
+                                    XmlString.ChildNodes[j].InnerText = processed_Inner;
+                                }
+                            }
+                            Processed_PrintList[i].ParentNode.ReplaceChild(XmlString, Processed_PrintList[i]);
+                        }
+                        Else_Active = false;
+                    }
+                    else
+                    {
+                        Processed_PrintList[i].ParentNode.RemoveChild(Processed_PrintList[i]);
+                    }
+
+                }
+                else if (XmlString.Name.Contains("else"))
+                {
+                    if (Else_Active)
+                    {
+                        if (XmlString.HasChildNodes)
+                        {
+                            for (int j = 0; j < XmlString.ChildNodes.Count; j++)
+                            {
+                                XmlNode line = XmlString.ChildNodes[j];
+                                if (line.Name != "LC")
+                                {
+                                    string processed_Inner = GetProperty(line.InnerText);
+                                    XmlString.ChildNodes[j].InnerText = processed_Inner;
+                                }
+                            }
+                            Processed_PrintList[i].ParentNode.ReplaceChild(XmlString, Processed_PrintList[i]);
+                        }
+                    }
+                    else { Else_Active = true; }// reset
                 }
             }
-            return preProcessed;
+            return Processed_PrintList;
         }
 
         #region Branch
@@ -480,7 +477,7 @@ namespace XmlFormEngine
                         {
                             indexEnd = pString.Length;
                         }
-                        string isolatedPropertyCall = pString.Substring(indexStart, (indexEnd - indexStart));
+                        string isolatedPropertyCall = pString.Substring(indexStart, (indexEnd - indexStart)).Trim();
                         string property = isolatedPropertyCall.Replace(cInfo.Name + ".", "");
                         object character = cInfo.GetValue(cManager);
 

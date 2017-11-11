@@ -4,7 +4,15 @@
 
   <E_20>
     <Print>
-      Test, No Attributes//BREAK// maybe it does
+      <default>
+      Test, No Attributes<LC>Wait 3</LC> maybe it does Player.Age
+      </default>
+      <E_21>
+        So 21 is enabled
+      </E_21>
+      <else>
+        So 21 is <LC>Wait input</LC>not enabled
+      </else>
     </Print>
     
     <Print EI ="21">
