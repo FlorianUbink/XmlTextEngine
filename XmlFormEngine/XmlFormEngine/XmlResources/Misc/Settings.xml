@@ -1,27 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Game>
-  
-  
-<General>
-  <Version>111117a</Version>
-</General>
-
-<XmlLibrary>
+  <Path>
+    <Saves>C:\Users\Florian\Desktop\Xnk</Saves>
+  </Path>
+  <General>
+    <Version>111117a</Version>
+  </General>
+  <XmlLibrary>
   1-2,XMLFile2.xml
   10-13,XMLFile1.xml
   20-25,XMLFile3.xml
 </XmlLibrary>
-
-<Font>
+  <Font>
   default font
   default size
   default color   
 </Font>
-
-
-
-
-
-
 </Game>

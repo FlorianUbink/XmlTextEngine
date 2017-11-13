@@ -19,6 +19,7 @@ namespace XmlFormEngine
         newEvent,
         continueEvent,
         confirmInput,
+        skip,
         disabled
     }
 
@@ -63,6 +64,7 @@ namespace XmlFormEngine
         int lineStart = 0;
         XmlNodeList PrintList_Processed = null;
         int sec = 0;
+        bool skip = false;
 
         // Banch
         Dictionary<string, string> Opt_type = new Dictionary<string, string>();
@@ -74,18 +76,27 @@ namespace XmlFormEngine
         #endregion
 
         #region Pre-Game
-        public Game(XmlDocument settingXml)
+        public Game(XmlDocument settingXml, string fileName)
         {
             InitializeComponent();
+            eventProcessor = new EventProcessor(this);
             SettingXml = settingXml;
+
+            if (fileName != "")
+            {
+                LoadGame(fileName);
+            }
             
         }
 
         private void Game_Load(object sender, EventArgs e)
         {
             #region DebugLoad
-            EI_Current = 20;
-            EI_Enabled.Add(20);
+            if (EI_Current == -1)
+            {
+                EI_Current = 20;
+                EI_Enabled.Add(20);
+            }
             #endregion
 
             #region Load XmlFileLibrary
@@ -100,7 +111,6 @@ namespace XmlFormEngine
             }
             
             #endregion
-            eventProcessor = new EventProcessor(this);
             PrintWindow.TabStop = false;
             Game_Reset();
 
@@ -289,6 +299,7 @@ namespace XmlFormEngine
                                 }
                                 else if (innerCommand.Contains("WAIT"))
                                 {
+                                    enterHandle = EnterHandling.skip;
                                     sec = int.Parse(innerCommand.Replace("WAIT", ""));
                                     printStart = i;
                                     lineStart = j + 1;
@@ -330,6 +341,11 @@ namespace XmlFormEngine
         #region Console
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyData == Keys.F10)
+            {
+                SafeGame();
+            }
+
             if (e.KeyData == Keys.Enter)
             {
                 
@@ -346,12 +362,14 @@ namespace XmlFormEngine
                         e.Handled = true;
                         e.SuppressKeyPress = true;
                         break;
+
                     case EnterHandling.continueEvent:
                         PrintWindow_TextProcessing(PrintList_Processed);
                         e.Handled = true;
                         e.SuppressKeyPress = true;
                         enterHandle = EnterHandling.newEvent;
                         goto ReHandle;
+
                     case EnterHandling.confirmInput:
                         PrintWindow.Text = PrintWindow.Text.Replace(Type_ErrorMessage, " ");
                         string input = Opt_TypeBox.Text.Replace(" ", "");
@@ -373,8 +391,10 @@ namespace XmlFormEngine
                             Opt_TypeBox.Text = "";
                             PrintWindow.Text += Type_ErrorMessage;
                         }
+                        break;
 
-
+                    case EnterHandling.skip:
+                        skip = true;
                         break;
                     default:
                         break;
@@ -697,9 +717,10 @@ namespace XmlFormEngine
             if (sec != 0)
             {
                 tickCount += timer2.Interval;
-                if (tickCount >= sec * 1000)
+                if (tickCount >= sec * 1000 ||skip)
                 {
                     timer2.Stop();
+                    skip = false;
                     tickCount = 0;
                     PrintWindow_TextProcessing(PrintList_Processed);
                     Update_CommandList();
@@ -707,6 +728,27 @@ namespace XmlFormEngine
                     Update_Active = true;
                 }
             }
+        }
+
+        private void SafeGame()
+        {
+            Data data = new Data
+            {
+                Enabled_EI = EI_Enabled,
+                Current_EI = EI_Current,
+                cManager = eventProcessor.cManager
+            };
+            string save = DateTime.Now.ToString("d_MMM_yyyy_HH_mm");
+            Gate.game_Safe(data, save+".sdata");
+        }
+
+        private void LoadGame(string fileName)
+        {
+            Data data = Gate.game_Load(@fileName);
+
+            EI_Enabled = data.Enabled_EI;
+            EI_Current = data.Current_EI;
+            eventProcessor.cManager = data.cManager;
         }
     }
 }

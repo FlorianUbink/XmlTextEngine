@@ -52,6 +52,7 @@
     <Compile Include="CharacterManager.cs" />
     <Compile Include="Characters\Playable.cs" />
     <Compile Include="Characters\Player.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="EventProcessor.cs" />
     <Compile Include="Game.cs">
       <SubType>Form</SubType>
@@ -67,6 +68,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Gate.cs" />
     <EmbeddedResource Include="Game.resx">
       <DependentUpon>Game.cs</DependentUpon>
     </EmbeddedResource>
@@ -108,6 +110,9 @@
     <Content Include="XmlResources\Characters\Playable.xml" />
     <Content Include="XmlResources\Misc\BranchPresets.xml" />
     <Content Include="XmlResources\Misc\Settings.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="XmlResources\Save\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

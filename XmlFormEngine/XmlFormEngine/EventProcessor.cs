@@ -22,7 +22,7 @@ namespace XmlFormEngine
         Game game;
         public delegate string LinkInfoHandle(string CallString);
         LinkInfoHandle link_InfoCheck;
-        CharacterManager cManager = new CharacterManager();
+        public CharacterManager cManager = new CharacterManager();
 
         string[] splitCharacters = new string[] { "\r\n" };
         string[] transformOperators = new string[] { "==", "+=", "-=", "/=", "*=" };
@@ -185,7 +185,7 @@ namespace XmlFormEngine
                                                                  ref Label Opt_A, ref Label Opt_B, ref Label Opt_C, ref Label Opt_D)
         {
             Opt_type.Clear();
-
+            bool hasType = false;
             foreach (XmlNode option_SingleNode in option_XmlList)
             {
                 XmlNode option_inputNode = option_SingleNode.SelectSingleNode("Input");
@@ -219,13 +219,7 @@ namespace XmlFormEngine
                 }
                 else if (option_inputNode.Attributes["Tag"].Value == "Type")
                 {
-                    if (!Opt_TypeBox.Enabled)
-                    {
-                        enterHandle = EnterHandling.confirmInput;
-                        Opt_TypeBox.Enabled = true;
-                        Opt_TypeBox.Visible = true;
-                    }
-
+                    hasType = true;
                     string option_Tag = option_SingleNode.Attributes["Tag"].Value;
                     string rawTypeConditions = option_inputNode.InnerText.Replace(" ", "");
                     string[] option_typeConditions = rawTypeConditions.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -236,6 +230,15 @@ namespace XmlFormEngine
 
                         Opt_type.Add(pCondition, option_Tag);
                     }
+                }
+            }
+            if (hasType)
+            {
+                if (!Opt_TypeBox.Enabled)
+                {
+                    enterHandle = EnterHandling.confirmInput;
+                    Opt_TypeBox.Enabled = true;
+                    Opt_TypeBox.Visible = true;
                 }
             }
         }
@@ -392,7 +395,7 @@ namespace XmlFormEngine
             if (option_XmlList.Count == 1)
             {
                 XmlNodeList Result_NodeList = option_XmlList[0].SelectSingleNode("Result").ChildNodes;
-                string[] Result_Set = null;
+                XmlNodeList raw_ResultSet = null;
                 string[] Result_InfoList = Result_Info.Split(new char[] { '-' });
                 int ReturnedValue = -1;
 
@@ -403,22 +406,20 @@ namespace XmlFormEngine
                         if (ResultList_Node.Name.Contains("S_"))
                         {
                             string p_Name = ResultList_Node.Name;
-                            string raw_Set = BranchPresets.SelectSingleNode("/Game/Result/" + p_Name).InnerText.Replace(" ", "");
-                            Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                            raw_ResultSet = BranchPresets.SelectSingleNode("/Game/Result/" + p_Name).ChildNodes;
                             break;
 
                         }
                         else
                         {
-                            string raw_Set = ResultList_Node.InnerText.Replace(" ", "");
-                            Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                            raw_ResultSet = ResultList_Node.ChildNodes;
+                            
                             break;
                         }
                     }
                     else if (Result_InfoList[0] == "N")
                     {
-                        string raw_Set = Result_NodeList[0].InnerText.Replace(" ", "");
-                        Result_Set = raw_Set.Split(splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                        raw_ResultSet = Result_NodeList[0].ChildNodes;
                         break;
                     }
                 }
@@ -428,15 +429,18 @@ namespace XmlFormEngine
                 {
                     if (!firstRound)
                     {
-                        string result = Result_Set[int.Parse(indexInfo)];
-                        SetValueProperty(result.Trim());
-                        ReturnedValue = EventIdentificationLinking(result.Trim(), ref EI_Current, ref CI_Current);
+                        string[] result_Array = raw_ResultSet[int.Parse(indexInfo)].InnerText.Split(new string[] { "\r\n", "," }, StringSplitOptions.RemoveEmptyEntries);
 
-                        if (ReturnedValue != -1)
+                        foreach (string result in result_Array)
                         {
-                            EI_Enabled.Add(ReturnedValue);
-                        }
+                            SetValueProperty(result.Replace(" ","").Trim());
+                            ReturnedValue = EventIdentificationLinking(result.Replace(" ", "").Trim(), ref EI_Current, ref CI_Current);
 
+                            if (ReturnedValue != -1)
+                            {
+                                EI_Enabled.Add(ReturnedValue);
+                            }
+                        }
                     }
                     // To NOT process the Result_Set name as Result
                     else

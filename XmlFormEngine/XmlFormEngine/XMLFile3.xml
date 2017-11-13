@@ -22,7 +22,7 @@
     <Branch>
       <Option Tag ="A">
       
-        <Input Tag ="Click">
+        <Input Tag ="Type">
         One
         </Input>
 
@@ -39,18 +39,23 @@
         </Roll>
 
         <Result>
-          <Set_1>
-            Player.Age == 13
-            Link(21)
-          </Set_1>
           S_1
+          <Set_1>
+            <Result1>
+              Player.Age == 13
+            Enable(23),
+            Link(21)
+          </Result1>
+            <Result2>Player.Age == 13,Enable(23),Link(21)</Result2>
+          </Set_1>
+          
         </Result>
       
       </Option>
 
       <Option Tag ="B">
 
-        <Input Tag ="Type">
+        <Input Tag ="Click">
           Two
         </Input>
 
@@ -84,7 +89,7 @@
     </Print>
 
     <Print EI ="20">
-      Your comming from set 20
+      Your comming from set 75
     </Print>
     
     
